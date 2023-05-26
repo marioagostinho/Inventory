@@ -11,7 +11,7 @@ import Layout from './pages/_layout/Layout';
 
 //PAGES
 import Home from './pages/Home/Home';
-import Products from './pages/Products/Produtcs';
+import Products from './pages/Products/Products';
 import Batches from './pages/Batches/Batches';
 import NotFound from './pages/NotFound/NotFound';
 

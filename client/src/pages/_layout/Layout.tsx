@@ -8,8 +8,10 @@ export default function Layout() {
     return (
         <>
             <SideNavBar></SideNavBar>
-            <div id="app-content">
-                <Outlet />
+            <div className="app-content">
+                <div className="app-centralized-content">
+                    <Outlet />
+                </div>
             </div>
         </>
     );
