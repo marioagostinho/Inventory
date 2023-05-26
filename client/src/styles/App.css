@@ -1,5 +1,11 @@
 .App {
   text-align: center;
+  display: flex;
+}
+
+#root {
+  display: flex;
+  text-align: center;
 }
 
 .App-logo {
@@ -36,3 +42,19 @@
     transform: rotate(360deg);
   }
 }
+
+@font-face {
+  font-family: BrandonBLK;
+  src: url(../../public/BrandonText-Black.otf);
+}
+
+@font-face {
+  font-family: BrandonLGT;
+  src: url(../../public/BrandonText-Light.otf);
+}
+
+#app-content {
+  flex-grow: 1;
+  font-family: BrandonLGT;
+}
+
