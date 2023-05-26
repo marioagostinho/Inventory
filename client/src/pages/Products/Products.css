@@ -1,3 +1,7 @@
 .products-content {
     margin-top: 75px;
 }
+
+.form-button > button {
+    margin-right: 5px;
+}

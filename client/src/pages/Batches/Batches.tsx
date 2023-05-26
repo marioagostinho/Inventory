@@ -2,6 +2,9 @@ import React from 'react'
 
 import './Batches.css';
 import ItemList from '../../components/ItemList/ItemList';
+import { Button } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 export default function Batches() {
 
@@ -21,9 +24,20 @@ export default function Batches() {
 
     return (
         <div className='batches-content'>
+            
+            <div className='content-header'>
+                <div className='header-left'>
+                    <h1>Batches</h1>
+                </div>
+                <div className='header-right'>
+                    <Button variant="success">
+                            <FontAwesomeIcon icon={faPlus} />Add
+                    </Button>
+                </div>
+            </div>
+            <hr />
+
             <ItemList 
-                Title='Batches' 
-                AddLink=''
                 CanAction={true} 
                 Header={Header} 
                 Items={Items}

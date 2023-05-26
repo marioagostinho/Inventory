@@ -25,18 +25,29 @@ export default function Orders() {
 
     return (
         <div className='orders-content'>
+
+            <div className='content-header'>
+                <div className='header-left'>
+                    <h1>Orders</h1>
+                </div>
+            </div>
+            <hr />
+
             <ItemList
-                Title='Orders'
-                AddLink='Orders/Modify'
                 CanAction={false}
                 Header={Header}
                 Items={Items} />
 
             <div className='separation'></div>
 
+            <div className='content-header'>
+                <div className='header-left'>
+                    <h1>History</h1>
+                </div>
+            </div>
+            <hr />
+
             <ItemList
-                Title='History'
-                AddLink=''
                 CanAction={false}
                 Header={Header}
                 Items={ItemsHistory} />
