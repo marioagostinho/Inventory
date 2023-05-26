@@ -14,6 +14,7 @@ import Home from './pages/Home/Home';
 import Products from './pages/Products/Products';
 import Batches from './pages/Batches/Batches';
 import NotFound from './pages/NotFound/NotFound';
+import Orders from './pages/Orders/Orders';
 
 const client = new ApolloClient({
   cache: new InMemoryCache({
@@ -32,6 +33,7 @@ function App() {
             <Route index element={<Home/>} />
             <Route path="products" element= {<Products />} />
             <Route path="batches" element= {<Batches />} />
+            <Route path="orders" element= {<Orders />} />
             <Route path="*" element= {<NotFound />} />
           </Route>
         </Routes>

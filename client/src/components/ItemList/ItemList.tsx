@@ -9,11 +9,12 @@ import './ItemList.css';
 interface ItemListProps {
     Title: string,
     AddLink: string,
+    CanAction: Boolean,
     Header: String[],
     Items: any[]
 }
 
-export default function ItemList({Title, AddLink, Header, Items}: ItemListProps) {
+export default function ItemList({Title, AddLink, CanAction, Header, Items}: ItemListProps) {
     return (
         <div>
             <div className='table-header'>
@@ -21,7 +22,10 @@ export default function ItemList({Title, AddLink, Header, Items}: ItemListProps)
                     <h1>{Title}</h1>
                 </div>
                 <div className='table-header-right'>
-                    <Button variant="success"><FontAwesomeIcon icon={faPlus} />Add</Button>
+                    {
+                        AddLink !== '' &&
+                        <Button variant="success"><FontAwesomeIcon icon={faPlus} />Add</Button>
+                    }
                 </div>
             </div>
             <hr></hr>
@@ -52,12 +56,17 @@ export default function ItemList({Title, AddLink, Header, Items}: ItemListProps)
                             }
                             <td>
                             <div className='table-actions'>
-                                <a className='pointer'>
-                                <FontAwesomeIcon icon={faPenToSquare} className='edit-icon' />
-                                </a>
-                                <a className='pointer'>
-                                <FontAwesomeIcon icon={faTrashCan} className='delete-icon' />
-                                </a>
+                                {
+                                    CanAction !== false &&
+                                    <div>
+                                        <a className='pointer'>
+                                        <FontAwesomeIcon icon={faPenToSquare} className='edit-icon' />
+                                        </a>
+                                        <a className='pointer'>
+                                        <FontAwesomeIcon icon={faTrashCan} className='delete-icon' />
+                                        </a>
+                                    </div>
+                                }
                             </div>
                             </td>
                         </tr>

@@ -23,7 +23,8 @@ export default function Batches() {
         <div className='batches-content'>
             <ItemList 
                 Title='Batches' 
-                AddLink='' 
+                AddLink=''
+                CanAction={true} 
                 Header={Header} 
                 Items={Items}
             />

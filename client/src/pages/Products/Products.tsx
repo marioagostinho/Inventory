@@ -22,6 +22,7 @@ export default function Products() {
             <ItemList 
                 Title='Products' 
                 AddLink='' 
+                CanAction={true}
                 Header={Header} 
                 Items={Items}
             />
