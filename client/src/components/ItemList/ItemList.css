@@ -1,5 +1,4 @@
 .table-container {
-    margin-top: 50px;
     overflow: auto;
 }
 
@@ -23,9 +22,22 @@
     font-size: 20px;
 }
 
+table > thead > tr {
+    background-color: #212529!important;
+    color: white
+}
+
 .table-actions {
     float:right; 
     cursor: pointer;
+}
+
+tr {
+    border-bottom: solid 1px #cccccc;
+}
+
+tr:nth-child(2n) {
+    background-color:  rgba(217, 217, 217,0.1);
 }
 
 tr:hover {

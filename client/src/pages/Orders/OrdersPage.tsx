@@ -1,45 +1,127 @@
-import React from 'react';
-
+import React, { Component } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { Col, Nav, Row, Tab } from 'react-bootstrap';
+import moment from 'moment';
 
 import ItemList from '../../components/ItemList/ItemList';
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
+import BatchHistoryService from '../../services/BatchHistoryService';
 
+import './OrdersPage.css';
 
-export default function OrdersPage() {
-    const navigate = useNavigate();
+interface OrdersComponentProps {
+    AddClick: () => void;
+}
 
-    //MOCAP DATA
-    const Header: String[] = [
-        "Product",
-        "Date",
-        "Amount",
-        "Type"
-    ];
+interface State {
+    inItems: any[];
+    outItems: any[];
+}
 
-    const Items: any[] = [
-        {"id": 3, "Product": "Rice", "date": "26/05/2023", "amount": 50, "type": "Order Out"},
-        {"id": 1, "Procuct": "Pasta", "date": "25/05/2023", "amount": 100, "type": "Order In"}
-    ];
+class OrdersPageComponent extends Component<OrdersComponentProps, State> {
+    private batchHistoryService: BatchHistoryService;
 
-    //Add action to be used in the ItemList
-    const AddClick = () => {
-        navigate("/Orders/0");
+    constructor(props: any) {
+        super(props);
+
+        this.state = {
+            inItems: [],
+            outItems: []
+        }
+
+        this.batchHistoryService = new BatchHistoryService();
     }
 
-    return (
-        <div className='orders-content'>
+    componentDidMount() {
+        this.fetchBatchHistoriesByType("ORDER_IN", "inItems");
+        this.fetchBatchHistoriesByType("ORDER_OUT", "outItems");
+    }
 
-            <ContentTitle 
-                Title={'Orders'}
-                AddClick={AddClick}
-            />
+    fetchBatchHistoriesByType = (type: string, targetState: keyof State) => {
+        this.batchHistoryService
+            .GetBatchHistoriesByType(type as "string")
+            .then((data) => {
+                if (data && data.batchHistories) {
+                    const items = data.batchHistories
+                        .map((item: any) => ({
+                            id: item.id,
+                            product: item.batch.product.name,
+                            amount: item.quantity,
+                            date: moment(item.date).format('DD/MM/YYYY')
+                    }));
 
-            <ItemList
-                CanAction={false}
-                Header={Header}
-                Items={Items} />
-        </div>
-        
-    )
+                    const updatedState = {
+                        [targetState]: items
+                    } as Pick<State, keyof State>;
+              
+                    this.setState(updatedState);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
+
+    render() {
+        //TABLE INFORMATION
+        const Header = ["Product", "Amount", "Date"];
+        const { inItems, outItems } = this.state;
+
+        const { AddClick } = this.props;
+
+
+        return (
+            <div className='orders-content'>
+
+                <ContentTitle 
+                    Title={'Orders'}
+                    AddClick={AddClick} />
+
+
+                <Tab.Container id="left-tabs-example" defaultActiveKey="first">
+                    <Row>
+                        <Col sm={2}>
+                        <Nav variant="pills" className="flex-column">
+                            <Nav.Item>
+                            <Nav.Link eventKey="first">Orders In</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                            <Nav.Link eventKey="second">Orders Out</Nav.Link>
+                            </Nav.Item>
+                        </Nav>
+                        </Col>
+                        <Col sm={10}>
+                            <Tab.Content>
+                                <Tab.Pane eventKey="first">
+                                <ItemList 
+                                    CanAction={false}
+                                    Header={Header}
+                                    Items={inItems} />
+                                </Tab.Pane>
+                                <Tab.Pane eventKey="second">
+                                <ItemList 
+                                    CanAction={false}
+                                    Header={Header}
+                                    Items={outItems} />
+                                </Tab.Pane>
+                            </Tab.Content>
+                        </Col>
+                    </Row>
+                </Tab.Container>
+            </div>
+        );
+    }
 }
+
+function OrdersPage() {
+    const navigate = useNavigate();
+
+    const AddClick = () => {
+        navigate(`/orders/0`);
+    };
+
+    return <OrdersPageComponent AddClick={AddClick} />;
+}
+
+export default OrdersPage;

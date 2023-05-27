@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Component, useState } from 'react'
 
 import { Button, Collapse } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -6,79 +6,103 @@ import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import ItemList from '../../components/ItemList/ItemList';
 import ProductForm from './ProductForm/ProductForm';
+import ProductService from '../../services/ProductService';
 
-export default function ProductsPage() {
-    const [open, setOpen] = useState(false);
+interface State {
+    open: boolean;
+    items: any[];
+}
 
-    //MOCKAP DATA
-    const Header: String[] = [
-        'Name',
-        'Quantity'
-    ];
+class ProductsPage extends Component<{}, State> {
+    private productService: ProductService;
 
-    const Items: any[] = [
-        {'id': 1, 'name': 'Rice', 'quantity': 1000},
-        {'id': 2, 'name': 'Lettuce', 'quantity': 100},
-        {'id': 3, 'name': 'Tomato', 'quantity': 500},
-        {'id': 4, 'name': 'Pasta', 'quantity': 750}
-    ];
+    //Construct 
+    constructor(props: any) {
+        super(props);
 
-    //Cancel click passed to ProductForm
-    const CancelClick = () => {
-        setOpen(!open)
+        this.state = {
+            open: false,
+            items: [],
+        };
+
+        this.productService = new ProductService();
     }
 
-    //Edit click passed to ItemList
-    const EditClick =  (id: any) => {
-        setOpen(true);
+    componentDidMount() {
+        this.fetchProducts();
     }
 
-    return (
+    fetchProducts = () => {
+        this.productService
+        .GetProducts()
+        .then((data) => {
+            if (data && data.products) {
+                const items = data.products.map((item: any) => ({
+                    id: item.id,
+                    name: item.name
+                }));
+
+                this.setState({ items });
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    };
+
+    onCollapse = (newState: boolean) => {
+        this.setState({
+            open: newState
+        });
+    }
+
+    render() {
+        const { open, items } = this.state;
+
+        const Header = ['Name'];
+
+        return (
         <div className='products-content'>
-            
             {/* Product Tile */}
             <div className='content-header'>
-                <div className='header-left'>
-                    <h1>Products</h1>
-                </div>
-                <div className='header-right'>
-                    {/* To open and close the Product Form */}
-                    <Button variant="success"
-                        onClick={() => setOpen(!open)}
-                        aria-controls="collapse-product"
-                        aria-expanded={open}
-                    >
-                        {
-                            open === false &&
-                            <FontAwesomeIcon icon={faPlus} />
-                        }
-                        {
-                            open === true &&
-                            <FontAwesomeIcon icon={faMinus} />
-                        }
-                        Add
-                    </Button>
-                </div>
+            <div className='header-left'>
+                <h1>Products</h1>
+            </div>
+            <div className='header-right'>
+                {/* To open and close the Product Form */}
+                <Button
+                variant='success'
+                onClick={() => this.onCollapse(!this.state.open)}
+                aria-controls='collapse-product'
+                aria-expanded={open}
+                >
+                {open === false && <FontAwesomeIcon icon={faPlus} />}
+                {open === true && <FontAwesomeIcon icon={faMinus} />}
+                Add
+                </Button>
+            </div>
             </div>
             <hr />
 
             {/* Product Form */}
             <div className='product-item'>
-                <Collapse in={open}>
-                    <div id="collapse-product">
-                        <ProductForm 
-                            CancelClick={CancelClick} />
-                    </div>
-                </Collapse>
+            <Collapse in={open}>
+                <div id='collapse-product'>
+                <ProductForm CancelClick={() => this.onCollapse(false)} />
+                </div>
+            </Collapse>
             </div>
 
             {/* Products Table */}
             <ItemList
-                CanAction={true}
-                Header={Header} 
-                Items={Items}
-                EditClick={EditClick}
+            CanAction={true}
+            Header={Header}
+            Items={items}
+            EditClick={() => this.onCollapse(true)}
             />
         </div>
-    );
+        );
+    }
 }
+  
+export default ProductsPage;

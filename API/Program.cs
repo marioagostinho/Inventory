@@ -24,8 +24,25 @@ builder.Services
     .AddQueryType<Query>()
     .AddFiltering();
 
+//CORS
+builder.Services.AddCors(
+    options =>
+    {
+        options.AddPolicy(name: "_allowSpecificOrigins",
+            policy =>
+            {
+                policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            }
+         );
+    }
+);
 
 var app = builder.Build();
+
+//Allow access to specific origins
+app.UseCors("_allowSpecificOrigins");
 
 //GraphQL
 app.MapGraphQL();

@@ -1,0 +1,17 @@
+.nav-item > a {
+    color: black;
+    text-decoration: none;
+    border-radius: 0px !important;
+    padding: 11px;
+}
+
+.nav-item > a:hover {
+    color: black;
+    text-decoration:underline;
+}
+
+.nav-item > .active {
+    background-color: #212529!important;
+    border-radius: 0px !important;
+    text-decoration: none!important;
+}

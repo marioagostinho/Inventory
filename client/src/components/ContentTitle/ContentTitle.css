@@ -1,15 +1,19 @@
+.Content-Title {
+  margin-bottom: 50px;
+}
+
 .content-header {
     display: flex;
     align-items: center;
     margin-top: 75px;
-  }
+}
   
-  .header-left {
-    flex: 1;
-    text-align: left;
-  }
+.header-left {
+  flex: 1;
+  text-align: left;
+}
   
-  .header-right {
-    flex: 1;
-    text-align: right;
-  }
+.header-right {
+  flex: 1;
+  text-align: right;
+}

@@ -1,32 +1,69 @@
-import React from 'react';
+import React, { Component } from 'react';
+
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
 import ItemList from '../../components/ItemList/ItemList';
+import BatchHistoryService from '../../services/BatchHistoryService';
+import moment from 'moment';
 
-export default function HistoryPage() {
+interface State {
+    items: [];
+}
 
-    //MOCAP DATA
-    const Header: String[] = [
-        "Product",
-        "Date",
-        "Amount",
-        "Type"
-    ];
+class HistoryPage extends Component<{}, State> {
+    private batchHistoryService: BatchHistoryService;
 
-    const Items: any[] = [
-        {"id": 3, "Product": "Rice (#3)", "date": "26/05/2023", "amount": 50, "type": "Order Out"},
-        {"id": 1, "Procuct": "Pasta (#1)", "date": "25/05/2023", "amount": 100, "type": "Order In"}
-    ];
+    constructor(props: any) {
+        super(props);
 
-    return (
+        this.state = {
+            items: []
+        }
+
+        this.batchHistoryService = new BatchHistoryService();
+    }
+
+    componentDidMount() {
+        this.fetchBatchHistories();
+    }
+
+    fetchBatchHistories = () => {
+        this.batchHistoryService
+            .GetBatchHistories()
+            .then((data) => {
+                if (data && data.batchHistories) {
+                    const items = data.batchHistories.map((item: any) => ({
+                        id: item.id,
+                        product: `${item.batch.product.name} (#${item.batch.id})`,
+                        date: moment(item.date).format('DD/MM/YYYY'),
+                        amount: item.quantity,
+                        type: item.type
+                    }));
+
+                    this.setState({ items });
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
+
+
+    render() {
+        const { items } = this.state;
+        const Header = ["Product", "Date", "Amount", "Type"];
+
+        return (
         <div>
-            <ContentTitle
-                Title={"History"} />
+            <ContentTitle Title={"History"} />
 
-            <ItemList 
-                CanAction={false}
-                Header={Header}
-                Items={Items}
+            <ItemList
+            CanAction={false}
+            Header={Header}
+            Items={items}
             />
         </div>
-    );
+        );
+    }
 }
+
+export default HistoryPage;

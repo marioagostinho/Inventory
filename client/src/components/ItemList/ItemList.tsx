@@ -25,8 +25,8 @@ export default function ItemList({MaxHeight = '800px', CanAction, Header, Items,
         <div className='table-container' style={{maxHeight:MaxHeight}}>
             <table className="table">
                 <thead>
-                    <tr className="table-dark">
-                        <th scope="col">#</th>
+                    <tr >
+                        <th scope="col">ID.</th>
                         {
                             Header.map((header, index) => (
                                 <th scope='col' key={index}>{header}</th>
