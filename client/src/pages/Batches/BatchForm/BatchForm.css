@@ -1,18 +1,14 @@
-.batch-content {
-    margin-top: 75px;
-}
-
 .batch-content > Form {
-    margin-top: 25px;
-    font-size: 20px;
+  margin-top: 25px;
+  font-size: 20px;
 }
 
 .form-actions {
-    margin-top: 50px;
-    display: flex;
-    justify-content: flex-end;
-  }
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-end;
+}
   
-  .form-actions button {
-    margin-left: 10px; /* Optional: Add some spacing between the buttons */
-  }
+.form-actions button {
+  margin-left: 10px;
+}

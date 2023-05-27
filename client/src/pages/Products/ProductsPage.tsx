@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
 
-import './ProductsPage.css';
-import ItemList from '../../components/ItemList/ItemList';
-import { Button, Card, Collapse, Form } from 'react-bootstrap';
+import { Button, Collapse } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { redirect } from 'react-router-dom';
+
+import ItemList from '../../components/ItemList/ItemList';
+import ProductForm from './ProductForm/ProductForm';
 
 export default function Products() {
     const [open, setOpen] = useState(false);
 
+    //MOCKAP DATA
     const Header: String[] = [
         'Name',
         'Quantity'
@@ -22,6 +23,12 @@ export default function Products() {
         {'id': 4, 'name': 'Pasta', 'quantity': 750}
     ];
 
+    //Cancel click passed to ProductForm
+    const CancelClick = () => {
+        setOpen(!open)
+    }
+
+    //Edit click passed to ItemList
     const EditClick =  (id: any) => {
         setOpen(true);
     }
@@ -29,6 +36,7 @@ export default function Products() {
     return (
         <div className='products-content'>
             
+            {/* Product Tile */}
             <div className='content-header'>
                 <div className='header-left'>
                     <h1>Products</h1>
@@ -58,31 +66,8 @@ export default function Products() {
             <div className='product-item'>
                 <Collapse in={open}>
                     <div id="collapse-product">
-                        <Card>
-                            <Card.Header>
-                                New Product
-                            </Card.Header>
-                            <Card.Body>
-                                <Form>
-                                    <Form.Group className="mb-3" controlId="formGridAddress1">
-                                        <Form.Label>Name</Form.Label>
-                                        <Form.Control placeholder="Ex: Rice" />
-                                    </Form.Group>
-
-                                    <div className='form-button'>
-                                        <Button variant="success" type="submit">
-                                            Add
-                                        </Button>
-                                        <Button variant="danger"
-                                            onClick={() => setOpen(!open)}
-                                            aria-controls="collapse-product"
-                                            aria-expanded={open}>
-                                            Cancel
-                                        </Button>
-                                    </div>
-                                </Form>
-                            </Card.Body>
-                        </Card>
+                        <ProductForm 
+                            CancelClick={CancelClick} />
                     </div>
                 </Collapse>
             </div>

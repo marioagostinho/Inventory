@@ -21,8 +21,8 @@ export default function SideBar() {
             </div>
             <a href='/' className={root  === '/' ? 'selected' : ''}><FontAwesomeIcon icon={faHouse}></FontAwesomeIcon>Home</a>
             <a href='/Products' className={root.includes('Product') ? 'selected' : ''}><FontAwesomeIcon icon={faUtensils}></FontAwesomeIcon>Products</a>
-            <a href='/Batches' className={root.includes('Batch')  ? 'selected' : ''}><FontAwesomeIcon icon={faBox}></FontAwesomeIcon>Batches</a>
             <a href='/Orders' className={root.includes('Order')  ? 'selected' : ''}><FontAwesomeIcon icon={faCartShopping}></FontAwesomeIcon>Orders</a>
+            <a href='/Batches' className={root.includes('Batch')  ? 'selected' : ''}><FontAwesomeIcon icon={faBox}></FontAwesomeIcon>Batches</a>
       </div>
     );
 }

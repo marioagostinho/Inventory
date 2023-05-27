@@ -15,8 +15,9 @@ import Home from './pages/Home/Home';
 import Products from './pages/Products/ProductsPage';
 import Batches from './pages/Batches/BatchesPage';
 import NotFound from './pages/NotFound/NotFound';
-import Orders from './pages/Orders/Orders';
+import Orders from './pages/Orders/OrdersPage';
 import BatchForm from './pages/Batches/BatchForm/BatchForm';
+import OrderForm from './pages/Orders/OrderForm/OrderForm';
 
 const client = new ApolloClient({
   cache: new InMemoryCache({
@@ -37,6 +38,7 @@ function App() {
             <Route path="batches" element= {<Batches />} />
             <Route path="batches/:batchId" element= {<BatchForm />} />
             <Route path="orders" element= {<Orders />} />
+            <Route path="orders/:orderId" element= {<OrderForm />} />
             <Route path="*" element= {<NotFound />} />
           </Route>
         </Routes>

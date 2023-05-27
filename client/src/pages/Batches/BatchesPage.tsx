@@ -1,16 +1,14 @@
 import React from 'react'
 
-import { Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 
 import ItemList from '../../components/ItemList/ItemList';
-import './BatchesPage.css';
-import { redirect, useNavigate } from 'react-router-dom';
+import ContentTitle from '../../components/ContentTitle/ContentTitle';
 
 export default function Batches() {
     const navigate = useNavigate();
 
+    //MOCAP DATA
     const Header: String[] = [
         'Product',
         'Quantity',
@@ -32,6 +30,7 @@ export default function Batches() {
         {'id': 4, 'product': 'Pasta', 'quantity': 750, 'expiritionDate': '10-10-20235'}
     ];
 
+    //Action to be used in the ContentTitle and ItemList
     const EditClick =  (id: any) => {
         navigate("/Batches/" + id);
     }
@@ -39,17 +38,9 @@ export default function Batches() {
     return (
         <div className='batches-content'>
             
-            <div className='content-header'>
-                <div className='header-left'>
-                    <h1>Batches</h1>
-                </div>
-                <div className='header-right'>
-                    <Button variant="success" href='/Batches/0'>
-                            <FontAwesomeIcon icon={faPlus} />Add
-                    </Button>
-                </div>
-            </div>
-            <hr />
+            <ContentTitle 
+                Title={'Batches'}
+            />
 
             <ItemList 
                 CanAction={true} 
