@@ -12,12 +12,13 @@ import Layout from './pages/_layout/Layout';
 
 //PAGES
 import Home from './pages/Home/Home';
-import Products from './pages/Products/ProductsPage';
-import Batches from './pages/Batches/BatchesPage';
 import NotFound from './pages/NotFound/NotFound';
-import Orders from './pages/Orders/OrdersPage';
-import BatchForm from './pages/Batches/BatchForm/BatchForm';
+import ProductsPage from './pages/Products/ProductsPage';
+import OrdersPage from './pages/Orders/OrdersPage';
 import OrderForm from './pages/Orders/OrderForm/OrderForm';
+import BatchesPage from './pages/Batches/BatchesPage';
+import BatchForm from './pages/Batches/BatchForm/BatchForm';
+import HistoryPage from './pages/History/HistoryPage';
 
 const client = new ApolloClient({
   cache: new InMemoryCache({
@@ -34,11 +35,12 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout/>}>
             <Route index element={<Home/>} />
-            <Route path="products" element= {<Products />} />
-            <Route path="batches" element= {<Batches />} />
-            <Route path="batches/:batchId" element= {<BatchForm />} />
-            <Route path="orders" element= {<Orders />} />
+            <Route path="products" element= {<ProductsPage />} />
+            <Route path="orders" element= {<OrdersPage />} />
             <Route path="orders/:orderId" element= {<OrderForm />} />
+            <Route path="batches" element= {<BatchesPage />} />
+            <Route path="batches/:batchId" element= {<BatchForm />} />
+            <Route path="history" element= {<HistoryPage />} />
             <Route path="*" element= {<NotFound />} />
           </Route>
         </Routes>

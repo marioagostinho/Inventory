@@ -7,7 +7,7 @@ import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import ItemList from '../../components/ItemList/ItemList';
 import ProductForm from './ProductForm/ProductForm';
 
-export default function Products() {
+export default function ProductsPage() {
     const [open, setOpen] = useState(false);
 
     //MOCKAP DATA

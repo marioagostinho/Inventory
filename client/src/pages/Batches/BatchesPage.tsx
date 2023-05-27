@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import ItemList from '../../components/ItemList/ItemList';
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
 
-export default function Batches() {
+export default function BatchesPage() {
     const navigate = useNavigate();
 
     //MOCAP DATA

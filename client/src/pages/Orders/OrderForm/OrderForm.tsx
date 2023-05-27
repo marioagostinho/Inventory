@@ -29,7 +29,14 @@ export default function OrderForm() {
             
             <Form>
                 <Row className="mb-3">
-                <Form.Group as={Col} controlId="formGridState">
+                    <Form.Group as={Col} controlId="formGridState">
+                        <Form.Label>Type</Form.Label>
+                        <Form.Select defaultValue="Order In">
+                            <option>Order In</option>
+                            <option>Order Out</option>
+                        </Form.Select>
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="formGridState">
                         <Form.Label>Product</Form.Label>
                         <Form.Select defaultValue="Choose...">
                             <option>Choose a product...</option>

@@ -6,20 +6,20 @@ import ItemList from '../../components/ItemList/ItemList';
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
 
 
-export default function Orders() {
+export default function OrdersPage() {
     const navigate = useNavigate();
 
-    //MOCKAP DATA
+    //MOCAP DATA
     const Header: String[] = [
-        "Batch",
+        "Product",
         "Date",
         "Amount",
         "Type"
     ];
 
     const Items: any[] = [
-        {"id": 3, "batch": 1, "date": "26/05/2023", "amount": 50, "type": "Order Out"},
-        {"id": 1, "batch": 1, "date": "25/05/2023", "amount": 100, "type": "Order In"}
+        {"id": 3, "Product": "Rice", "date": "26/05/2023", "amount": 50, "type": "Order Out"},
+        {"id": 1, "Procuct": "Pasta", "date": "25/05/2023", "amount": 100, "type": "Order In"}
     ];
 
     //Add action to be used in the ItemList
