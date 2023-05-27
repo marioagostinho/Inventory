@@ -1,20 +1,28 @@
 import React from 'react';
 
-import { Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 import './ItemList.css';
 
 interface ItemListProps {
-    CanAction: Boolean,
-    Header: String[],
-    Items: any[]
+    MaxHeight?: string;
+    CanAction: Boolean;
+    Header: String[];
+    Items: any[];
+    EditClick?: (props: any) => void;
 }
 
-export default function ItemList({CanAction, Header, Items}: ItemListProps) {
+export default function ItemList({MaxHeight = '800px', CanAction, Header, Items, EditClick}: ItemListProps) {
+
+    const handleEditClick = (props:any) => {
+        if(EditClick) {
+            EditClick(props);
+        }
+      };
+    
     return (
-        <div>
+        <div className='table-container' style={{maxHeight:MaxHeight}}>
             <table className="table">
                 <thead>
                     <tr className="table-dark">
@@ -45,11 +53,11 @@ export default function ItemList({CanAction, Header, Items}: ItemListProps) {
                                 {
                                     CanAction !== false &&
                                     <div>
-                                        <a className='pointer'>
-                                        <FontAwesomeIcon icon={faPenToSquare} className='edit-icon' />
+                                        <a className='pointer' onClick={() => handleEditClick(item.id)}>
+                                        <FontAwesomeIcon icon={faPenToSquare} className='edit-icon'/>
                                         </a>
                                         <a className='pointer'>
-                                        <FontAwesomeIcon icon={faTrashCan} className='delete-icon' />
+                                        <FontAwesomeIcon icon={faTrashCan} className='delete-icon'/>
                                         </a>
                                     </div>
                                 }
@@ -59,7 +67,7 @@ export default function ItemList({CanAction, Header, Items}: ItemListProps) {
                     ))
                 }
                 </tbody>
-            </table>
+            </table>  
         </div>
     );
 }
