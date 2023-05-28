@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
-import ItemList from '../../components/ItemList/ItemList';
+import ItemList, { ItemListHeader, ItemListInfo } from '../../components/ItemList/ItemList';
 import BatchHistoryService from '../../services/BatchHistoryService';
 import moment from 'moment';
 
@@ -32,12 +32,14 @@ class HistoryPage extends Component<{}, State> {
             .then((data) => {
                 if (data && data.batchHistories) {
                     const items = data.batchHistories.map((item: any) => ({
-                        id: item.id,
-                        product: `${item.batch.product.name} (#${item.batch.id})`,
-                        date: moment(item.date).format('DD/MM/YYYY'),
-                        amount: item.quantity,
-                        type: item.type
-                    }));
+                        Value: {
+                            id: item.id,
+                            product: `${item.batch.product.name} (#${item.batch.id})`,
+                            date: moment(item.date).format('DD/MM/YYYY'),
+                            amount: item.quantity,
+                            type: item.type
+                        }
+                    } as ItemListInfo));
 
                     this.setState({ items });
                 }
@@ -49,15 +51,32 @@ class HistoryPage extends Component<{}, State> {
 
 
     render() {
+         //TABLE INFORMATION
+         const Header: ItemListHeader[] = [
+            { Title: "ID.", Value: "id" },
+            { Title: "Product", Value: "product"},
+            { 
+                Title: "Amount",
+                Value: "amount", 
+                Render: (header: ItemListHeader, item: ItemListInfo) => {
+
+                    const colorStyle: string = (parseInt(item.Value[header.Value]) < 0) ? "red" : "green";
+
+                    return <td scope="row" key={item.Value[header.Value]} style={{color: colorStyle, fontWeight: 'bold'}}>
+                        {item.Value[header.Value]}
+                    </td>;
+                }
+            },
+            { Title: "Type", Value: "type" },
+            { Title: "Date", Value: "date" }
+        ];
         const { items } = this.state;
-        const Header = ["Product", "Date", "Amount", "Type"];
 
         return (
         <div>
             <ContentTitle Title={"History"} />
 
             <ItemList
-            CanAction={false}
             Header={Header}
             Items={items}
             />

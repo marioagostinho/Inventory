@@ -59,3 +59,15 @@ tr:hover {
 .edit-icon:hover {
     color:#0570FA;
 }
+
+.table-sort {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    margin-left: 5px;
+    font-size: 15px;
+}
+
+.table-sort:hover {
+    color: inherit;
+}

@@ -1,68 +1,63 @@
-import React from 'react';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import React, { useState } from 'react';
 
 import './ItemList.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowDownShortWide } from '@fortawesome/free-solid-svg-icons';
+import { Col, Form, Row } from 'react-bootstrap';
+
+export interface ItemListHeader {
+    Title: string;
+    Value: string;
+    Sort?: boolean;
+    Render?: (header: ItemListHeader, value: ItemListInfo) => JSX.Element;
+    Props?: any;
+}
+
+export interface ItemListInfo {
+    Value: any;
+    Props?: any;
+}
 
 interface ItemListProps {
     MaxHeight?: string;
-    CanAction: Boolean;
-    Header: String[];
-    Items: any[];
+    Header: ItemListHeader[];
+    Items: ItemListInfo[];
     EditClick?: (props: any) => void;
 }
 
-export default function ItemList({MaxHeight = '800px', CanAction, Header, Items, EditClick}: ItemListProps) {
-
-    const handleEditClick = (props:any) => {
-        if(EditClick) {
-            EditClick(props);
-        }
-      };
-    
+export default function ItemList({MaxHeight = '800px', Header, Items, EditClick}: ItemListProps) {
     return (
         <div className='table-container' style={{maxHeight:MaxHeight}}>
             <table className="table">
                 <thead>
                     <tr >
-                        <th scope="col">ID.</th>
                         {
                             Header.map((header, index) => (
-                                <th scope='col' key={index}>{header}</th>
+                                <th scope='col' key={index}>
+                                    {header.Title}
+                                </th>
                             ))
                         }
-                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
                 {
-                    Items.map((item) => (
-                        <tr key={item.id}>
+                    Items.map((item, itemIndex) => (
+                        <tr key={item.Value.id}>
                             {
-                                Object.entries(item).map(([key, value]) => {
-                                    if (key === "id") {
-                                        return <th scope="row" key={key}>{value as String}</th>;
+                                Header.map((header, headerIndex) => {
+                                    if (header.Render) {
+                                        return header.Render(header, item);
                                     } else {
-                                        return <td scope="row" key={key}>{value as String}</td>;
+                                    return <td scope="row"
+                                        {...header.Props}
+                                        {...item.Props}
+                                        key={itemIndex.toString() + headerIndex.toString()}>
+                                            {item.Value[header.Value] as String}
+                                        </td>;
                                     }
                                 })
                             }
-                            <td>
-                            <div className='table-actions'>
-                                {
-                                    CanAction !== false &&
-                                    <div>
-                                        <a className='pointer' onClick={() => handleEditClick(item.id)}>
-                                        <FontAwesomeIcon icon={faPenToSquare} className='edit-icon'/>
-                                        </a>
-                                        <a className='pointer'>
-                                        <FontAwesomeIcon icon={faTrashCan} className='delete-icon'/>
-                                        </a>
-                                    </div>
-                                }
-                            </div>
-                            </td>
                         </tr>
                     ))
                 }

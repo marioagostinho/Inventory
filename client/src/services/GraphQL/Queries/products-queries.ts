@@ -8,3 +8,13 @@ query GetProducts {
     }
 }
 `;
+
+export const GET_PRODUCT_BY_ID_QUERY = gql`
+query GetProducts($id: Int) {
+  products(where: {id: {eq: $id}})
+  {
+    id
+    name
+  }
+}
+`;

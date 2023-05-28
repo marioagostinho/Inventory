@@ -1,3 +1,7 @@
+.card {
+    margin-bottom: 50px !important;
+}
+
 .form-button > button {
     margin-right: 5px;
 }

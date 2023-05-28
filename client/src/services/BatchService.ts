@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, ApolloLink, HttpLink } from '@apollo/client';
 
-import { GET_BATCHES_QUERY } from './GraphQL/Queries/batches-queries';
+import { GET_BATCHES_QUERY, GET_BATCH_BY_ID_QUERY } from './GraphQL/Queries/batches-queries';
 
 export default class BatchService {
     private client: ApolloClient<any>;
@@ -26,6 +26,21 @@ export default class BatchService {
         try {
             const { data } = await this.client.query({
                 query: GET_BATCHES_QUERY
+            })
+
+            return data;
+        } catch (error) {
+            console.error(error);
+            
+            throw error;
+        }
+    }
+
+    async GetBatcById(id: number) {
+        try {
+            const { data } = await this.client.query({
+                query: GET_BATCH_BY_ID_QUERY,
+                variables: { id }
             })
 
             return data;

@@ -13,3 +13,18 @@ query GetBatches {
     }
 }
 `;
+
+export const GET_BATCH_BY_ID_QUERY = gql`
+query GetBatches($id: Int) {
+  batches(where: {id: {eq: $id}})
+  {
+    id
+    product {
+      id
+      name
+    }
+    quantity
+    expirationDate
+  }
+}
+`;

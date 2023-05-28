@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Col, Nav, Row, Tab } from 'react-bootstrap';
 import moment from 'moment';
 
-import ItemList from '../../components/ItemList/ItemList';
+import ItemList, { ItemListHeader, ItemListInfo } from '../../components/ItemList/ItemList';
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
 import BatchHistoryService from '../../services/BatchHistoryService';
 
@@ -45,11 +45,13 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
                 if (data && data.batchHistories) {
                     const items = data.batchHistories
                         .map((item: any) => ({
-                            id: item.id,
-                            product: item.batch.product.name,
-                            amount: item.quantity,
-                            date: moment(item.date).format('DD/MM/YYYY')
-                    }));
+                            Value: {
+                                id: item.id,
+                                product: item.batch.product.name,
+                                amount: item.quantity,
+                                date: moment(item.date).format('DD/MM/YYYY')
+                            }
+                    } as ItemListInfo));
 
                     const updatedState = {
                         [targetState]: items
@@ -65,7 +67,23 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
 
     render() {
         //TABLE INFORMATION
-        const Header = ["Product", "Amount", "Date"];
+        const Header: ItemListHeader[] = [
+            { Title: "ID", Value: "id" },
+            { Title: "Product", Value: "product" },
+            { 
+                Title: "Amount",
+                Value: "amount", 
+                Render: (header: ItemListHeader, item: ItemListInfo) => {
+
+                    const colorStyle: string = (parseInt(item.Value[header.Value]) < 0) ? "red" : "green";
+
+                    return <td scope="row" key={item.Value[header.Value]} style={{color: colorStyle, fontWeight: 'bold'}}>
+                        {item.Value[header.Value]}
+                    </td>;
+                }
+            },
+            { Title: "Date", Value: "date" }
+        ];
         const { inItems, outItems } = this.state;
 
         const { AddClick } = this.props;
@@ -95,13 +113,11 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
                             <Tab.Content>
                                 <Tab.Pane eventKey="first">
                                 <ItemList 
-                                    CanAction={false}
                                     Header={Header}
                                     Items={inItems} />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="second">
                                 <ItemList 
-                                    CanAction={false}
                                     Header={Header}
                                     Items={outItems} />
                                 </Tab.Pane>
