@@ -1,13 +1,10 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Form from 'react-bootstrap/esm/Form';
 import { Button, Card, Col, Row } from 'react-bootstrap';
 
-import { ItemListInfo } from '../../../components/ItemList/ItemList';
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
-
-import './ProductForm.css';
 import ProductService from '../../../services/ProductService';
 import NotFound from '../../NotFound/NotFound';
 
@@ -24,11 +21,13 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
     private form: ProductFormState;
 
     private formTitle: string;
+    private actionTitle: string;
     
     constructor(props: ProductFormProps) {
         super(props);
 
         this.formTitle = (props.id > 0) ? 'Edit Product' : 'New Product';
+        this.actionTitle = (props.id > 0) ? 'Edit' : 'Add';
 
         this.form = {
             name: ''
@@ -80,7 +79,7 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
                         <Card.Body>
                             <Row className="mb-3">
                                 <Form.Group as={Col} controlId="formGridCity">
-                                    <Form.Label>Quantity</Form.Label>
+                                    <Form.Label>Name</Form.Label>
                                     <Form.Control 
                                         placeholder="Ex: Pasta" 
                                         onChange={this.handleNameChange}
@@ -94,7 +93,7 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
                                     Cancel
                                 </Button>
                                 <Button variant="success" type="submit">
-                                    Add
+                                    {this.actionTitle}
                                 </Button>
                             </div>
                         </Card.Footer>

@@ -46,11 +46,7 @@ namespace Infrastructure.Data
             modelBuilder.Entity<BatchHistory>().HasData(
                 new BatchHistory(1, 1, 1000, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier"),
                 new BatchHistory(2, 2, 500, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier"),
-                new BatchHistory(3, 3, 150, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier"),
-                new BatchHistory(4, 1, -300, new DateTime(2022, 01, 10), EHistoryType.Lost, "Lost item"),
-                new BatchHistory(5, 1, -500, new DateTime(2022, 01, 10), EHistoryType.OrderOut, "Arrived order from supplier"),
-                new BatchHistory(6, 2, -250, new DateTime(2022, 01, 10), EHistoryType.OrderOut, "Arrived order from supplier"),
-                new BatchHistory(7, 3, -100, new DateTime(2022, 01, 10), EHistoryType.OrderOut, "Arrived order from supplier")
+                new BatchHistory(3, 3, 150, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier")
             );
         }
     }

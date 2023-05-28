@@ -23,5 +23,45 @@ namespace Infrastructure.Services
                 .Where(b => !b.IsDeleted)
                 .Include(b => b.Product);
         }
+
+        public async Task<Batch> AddOrUpdateBatchAsync(Batch batch)
+        {
+            var context = _dbContext.CreateDbContext();
+            context.Database.EnsureCreated();
+
+            Batch NewBatch;
+
+            if (batch.Id == null || batch.Id == 0)
+            {
+                NewBatch = new Batch(batch.ProductId, batch.Quantity, batch.ExpirationDate, batch.IsDeleted);
+
+                await context.Batches.AddAsync(NewBatch);
+            }
+            else
+            {
+                NewBatch = await context.Batches
+                    .Where(b => b.Id == batch.Id)
+                    .FirstOrDefaultAsync();
+
+                if (NewBatch == null)
+                {
+                    throw new Exception($"Batch with id {NewBatch.Id} was not found");
+                }
+                else
+                {
+                    NewBatch.ProductId = batch.ProductId;
+                    NewBatch.Quantity = batch.Quantity;
+                    NewBatch.ExpirationDate = batch.ExpirationDate;
+                    NewBatch.IsDeleted = batch.IsDeleted;
+
+                    context.Batches.Update(NewBatch);
+                }
+            }
+
+            await context.SaveChangesAsync();
+
+            return NewBatch;
+        }
     }
 }
+

@@ -22,6 +22,7 @@ builder.Services.AddScoped<IBatchHistoryService, BatchHistoryService>();
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
     .AddFiltering();
 
 //CORS
@@ -46,5 +47,6 @@ app.UseCors("_allowSpecificOrigins");
 
 //GraphQL
 app.MapGraphQL();
+
 
 app.Run();

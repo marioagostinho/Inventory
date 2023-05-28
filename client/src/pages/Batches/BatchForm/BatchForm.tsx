@@ -1,20 +1,20 @@
-import React, { Component, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { Component } from 'react';
+import { useParams } from 'react-router-dom';
 
 import Form from 'react-bootstrap/esm/Form';
 import Col from 'react-bootstrap/esm/Col';
 import Row from 'react-bootstrap/esm/Row';
 import Button from 'react-bootstrap/esm/Button';
 import DatePicker from 'react-datepicker';
+import { Card } from 'react-bootstrap';
+import moment from 'moment';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
 import ProductService from '../../../services/ProductService';
 import NotFound from '../../NotFound/NotFound';
 import BatchService from '../../../services/BatchService';
-import moment from 'moment';
-import { Card } from 'react-bootstrap';
 
-interface Form {
+interface FormProps {
     productId: number,
     quantity: number,
     expirationDate: Date,
@@ -24,7 +24,7 @@ interface Form {
 
 interface BatchFormState {
     products: any[];
-    form: Form;
+    form: FormProps;
 }
 
 interface BatchFormProps {
@@ -35,7 +35,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
     private productService: ProductService;
     private BatchService: BatchService;
 
-    private form: Form;
+    private form: FormProps;
     
     constructor(props: BatchFormProps) {
         super(props);
@@ -45,7 +45,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             form: {
                 productId: 1,
                 quantity: 0,
-                expirationDate: new Date || null,
+                expirationDate: new Date()|| null,
                 type: '',
                 comment: ''
             }
@@ -54,7 +54,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
         this.form = {
             productId: 1,
             quantity: 0,
-            expirationDate: new Date || null,
+            expirationDate: new Date() || null,
             type: '',
             comment: ''
         }

@@ -68,7 +68,7 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
     render() {
         //TABLE INFORMATION
         const Header: ItemListHeader[] = [
-            { Title: "ID", Value: "id" },
+            { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} } },
             { Title: "Product", Value: "product" },
             { 
                 Title: "Amount",
@@ -77,7 +77,7 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
 
                     const colorStyle: string = (parseInt(item.Value[header.Value]) < 0) ? "red" : "green";
 
-                    return <td scope="row" key={item.Value[header.Value]} style={{color: colorStyle, fontWeight: 'bold'}}>
+                    return <td key={item.Value[header.Value]} style={{color: colorStyle, fontWeight: 'bold'}}>
                         {item.Value[header.Value]}
                     </td>;
                 }

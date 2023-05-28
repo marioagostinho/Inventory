@@ -7,24 +7,30 @@ import ContentTitle from '../../components/ContentTitle/ContentTitle';
 import BatchService from '../../services/BatchService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import DeleteModal from '../../components/DeleteModal/DeleteModal';
 
+interface BatchesComponentState {
+    items: any[];
+    batchId: number;
+    batchName: string;
+    isModalVisible: boolean;
+}
 
 interface BatchesComponentProps {
     EditClick: (path: string) => void;
 }
 
-interface State {
-    items: any[];
-}
-
-class BatchesPageComponent extends Component<BatchesComponentProps, State> {
+class BatchesPageComponent extends Component<BatchesComponentProps, BatchesComponentState> {
     private batchService: BatchService;
 
     constructor(props: any) { 
         super(props); 
 
         this.state = {
-            items: []
+            items: [],
+            batchId: 0,
+            batchName: '',
+            isModalVisible: false
         }
 
         this.batchService = new BatchService();
@@ -56,9 +62,24 @@ class BatchesPageComponent extends Component<BatchesComponentProps, State> {
             });
     };
 
+    deleteAction = (id: number, name: string) => {
+        this.setState({
+            batchId: id,
+            batchName: name
+        })
+
+        this.handleModalVisibility(true);
+    }
+
+    handleModalVisibility = (newVisibility: boolean) => {
+        this.setState({
+            isModalVisible: newVisibility
+        });
+    }
+
     render() {
         const Header: ItemListHeader[] = [
-            { Title: "ID", Value: "id" },
+            { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} }},
             { Title: "Product", Value: "product" },
             { Title: "Quantity", Value: "quantity" },
             { Title: "Expiration Date", Value: "expirationDate" },
@@ -73,7 +94,10 @@ class BatchesPageComponent extends Component<BatchesComponentProps, State> {
                                     <FontAwesomeIcon icon={faPenToSquare} className='edit-icon'/>
                                 </a>
                                 <a className='pointer'>
-                                    <FontAwesomeIcon icon={faTrashCan} className='delete-icon'/>
+                                    <FontAwesomeIcon 
+                                        icon={faTrashCan} 
+                                        className='delete-icon'
+                                        onClick={() => this.deleteAction(item.Value.id, `Batch #${item.Value.id}`)}/>
                                 </a>
                             </div>
                         </td>
@@ -83,16 +107,20 @@ class BatchesPageComponent extends Component<BatchesComponentProps, State> {
         ];
         const { items } = this.state;
 
-        const { EditClick } = this.props;
-
         return (
             <div className='batches-content'>
-            <ContentTitle Title={'Batches'} />
+                <ContentTitle Title={'Batches'} />
 
-            <ItemList
-                Header={Header}
-                Items={items}
-            />
+                <ItemList
+                    Header={Header}
+                    Items={items}
+                />
+
+                <DeleteModal 
+                    id={this.state.batchId}
+                    name={this.state.batchName}
+                    isVisible={this.state.isModalVisible} 
+                    changeVisibility={this.handleModalVisibility}/>
             </div>
         );
     }

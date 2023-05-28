@@ -1,17 +1,20 @@
-import React, { Component, useState } from 'react'
+import React, { Component } from 'react'
 
-import { Button, Collapse } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinus, faPenToSquare, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 import ItemList, { ItemListHeader, ItemListInfo } from '../../components/ItemList/ItemList';
 import ProductService from '../../services/ProductService';
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
 import { useNavigate } from 'react-router-dom';
+import DeleteModal from '../../components/DeleteModal/DeleteModal';
 
-interface State {
+interface ProductsComponentState {
     open: boolean;
     items: any[];
+    productId: number;
+    productName: string;
+    isModalVisible: boolean;
 }
 
 interface ProductsComponentProps {
@@ -19,7 +22,7 @@ interface ProductsComponentProps {
 }
 
 
-class ProductsPageComponent extends Component<ProductsComponentProps, State> {
+class ProductsPageComponent extends Component<ProductsComponentProps, ProductsComponentState> {
     private productService: ProductService;
 
     item: ItemListInfo = {
@@ -32,7 +35,10 @@ class ProductsPageComponent extends Component<ProductsComponentProps, State> {
 
         this.state = {
             open: false,
-            items: []
+            items: [],
+            productId: 0,
+            productName: '',
+            isModalVisible: false
         };
 
         this.productService = new ProductService();
@@ -66,12 +72,27 @@ class ProductsPageComponent extends Component<ProductsComponentProps, State> {
         this.item = newItem;
     }
 
+    deleteAction = (id: number, name: string) => {
+        this.setState({
+            productId: id,
+            productName: name
+        })
+
+        this.handleModalVisibility(true);
+    }
+
+    handleModalVisibility = (newVisibility: boolean) => {
+        this.setState({
+            isModalVisible: newVisibility
+        });
+    }
+
     render() {
         const { items } = this.state;
         const { AddClick } = this.props;
 
         const Header: ItemListHeader[] = [
-            { Title: "ID", Value: "id", Sort: true },
+            { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} } },
             { Title: "Name", Value: "name" },
             {
                 Title: "",
@@ -83,7 +104,7 @@ class ProductsPageComponent extends Component<ProductsComponentProps, State> {
                                 <a className='pointer' href={`/products/${item.Value.id}`}>
                                     <FontAwesomeIcon icon={faPenToSquare} className='edit-icon'/>
                                 </a>
-                                <a className='pointer'>
+                                <a className='pointer' onClick={() => this.deleteAction(item.Value.id, item.Value.name)}>
                                     <FontAwesomeIcon icon={faTrashCan} className='delete-icon'/>
                                 </a>
                             </div>
@@ -106,6 +127,13 @@ class ProductsPageComponent extends Component<ProductsComponentProps, State> {
                 Header={Header}
                 Items={items}
              />
+
+             <DeleteModal 
+                id={this.state.productId}
+                name={this.state.productName}
+                isVisible={this.state.isModalVisible} 
+                changeVisibility={this.handleModalVisibility}/>
+
         </div>
         );
     }
