@@ -20,7 +20,7 @@ namespace Infrastructure.Services
             context.Database.EnsureCreated();
 
             return context.Batches
-                .Where(b => !b.IsDeleted)
+                .Where(b => !b.IsDeleted && b.Quantity > 0)
                 .Include(b => b.Product);
         }
 
@@ -61,6 +61,27 @@ namespace Infrastructure.Services
             await context.SaveChangesAsync();
 
             return NewBatch;
+        }
+
+        public async Task<bool> DeleteBatchAsync(int batchId)
+        {
+            var context = _dbContext.CreateDbContext();
+            context.Database.EnsureCreated();
+
+            var batch = await context.Batches
+                                    .Where(b => b.Id == batchId)
+                                    .FirstOrDefaultAsync();
+
+            if(batch == null)
+            {
+                throw new Exception($"Batch with id {batchId} was not found");
+            }
+
+            batch.IsDeleted = true;
+
+            context.Batches.Update(batch);
+
+            return await context.SaveChangesAsync() > 0;
         }
     }
 }

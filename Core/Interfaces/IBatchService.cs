@@ -6,5 +6,6 @@ namespace Core.Interfaces
     {
         IQueryable<Batch> GetBatches();
         Task<Batch> AddOrUpdateBatchAsync(Batch batch);
+        Task<bool> DeleteBatchAsync(int batchId);
     }
 }

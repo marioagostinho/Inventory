@@ -22,5 +22,17 @@ namespace API.GraphQL
         {
             return await batchHistoryService.AddBatchHistory(batchHistory);
         }
+
+        //GraphQL: Delete product by id
+        public async Task<bool> DeleteProduct([Service] IProductService productService, int productId)
+        {
+            return await productService.DeleteProductAsync(productId);
+        }
+
+        //GraphQL: Delete batch by id
+        public async Task<bool> DeleteBatch([Service] IBatchService batchService, int batchId)
+        {
+            return await batchService.DeleteBatchAsync(batchId);
+        }
     }
 }

@@ -6,5 +6,6 @@ namespace Core.Interfaces
     {
         IQueryable<Product> GetProducts();
         Task<Product> AddOrUpdateProductAsync(Product product);
+        Task<bool> DeleteProductAsync(int productId);
     }
 }

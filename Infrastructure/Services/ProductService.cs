@@ -59,5 +59,36 @@ namespace Infrastructure.Services
 
             return NewProduct;
         }
+
+        public async Task<bool> DeleteProductAsync(int productId)
+        {
+            var context = _dbContext.CreateDbContext();
+            context.Database.EnsureCreated();
+
+            var product = await context.Products
+                                    .Where(p => p.Id == productId)
+                                    .FirstOrDefaultAsync();
+
+            if(product == null)
+            {
+                throw new Exception($"Product with id {productId} was not found");
+            }
+
+            product.IsDeleted = true;
+
+            var batches = await context.Batches
+                                    .Where(b => b.ProductId == productId)
+                                    .ToListAsync();
+
+            foreach(var batch in batches) 
+            {
+                batch.IsDeleted = true;
+            }
+
+            context.Products.Update(product);
+            context.Batches.UpdateRange(batches);
+
+            return await context.SaveChangesAsync() > 0;
+        }
     }
 }
