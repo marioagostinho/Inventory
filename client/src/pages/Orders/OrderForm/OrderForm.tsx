@@ -1,62 +1,83 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import Form from 'react-bootstrap/esm/Form';
-import Col from 'react-bootstrap/esm/Col';
-import Row from 'react-bootstrap/esm/Row';
-import Button from 'react-bootstrap/esm/Button';
+import { Button, Card, Col, Form, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
+import moment from 'moment';
+
+import ProductService from '../../../services/ProductService';
+import BatchService from '../../../services/BatchService';
+import BatchHistoryService from '../../../services/BatchHistoryService';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
-import ProductService from '../../../services/ProductService';
 import NotFound from '../../NotFound/NotFound';
-import { Card } from 'react-bootstrap';
 
-interface Form {
-    productId: number,
-    quantity: number,
-    expirationDate: Date,
-    type: string,
-    comment: string
+
+interface BatchFormInfo {
+    id: number;
+    productId: number;
+    quantity: number;
+    expirationDate: Date;
+    isDeleted: boolean;
+}
+
+interface BatchHistoryFormInfo {
+    id: number;
+    batchId: number;
+    quantity: number;
+    date: Date;
+    type: string;
+    comment: string;
 }
 
 interface OrderFormState {
     products: any[];
-    form: Form;
+    batchForm: BatchFormInfo;
+    batchHistoryForm: BatchHistoryFormInfo;
 }
 
 interface OrderFormProps {
     id: any;
+    handleNavigation: () => void;
 }
 
 class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     private productService: ProductService;
+    private batchService: BatchService;
+    private batchHistoryService: BatchHistoryService
 
-    private form: Form;
+    private batchForm: BatchFormInfo;
+    private batchHistoryForm: BatchHistoryFormInfo;
     
     constructor(props: OrderFormProps) {
         super(props);
 
-        this.state = {
-            products: [],
-            form: {
-                productId: 1,
-                quantity: 0,
-                expirationDate: new Date || null,
-                type: '',
-                comment: ''
-            }
+        this.batchForm = {
+            id: 0,
+            productId: 0,
+            quantity: 0,
+            expirationDate: new Date() || null,
+            isDeleted: false
         };
 
-        this.form = {
-            productId: 1,
+        this.batchHistoryForm = {
+            id: 0,
+            batchId: 0,
             quantity: 0,
-            expirationDate: new Date || null,
-            type: '',
+            date: new Date() || null,
+            type: 'ORDER_IN',
             comment: ''
-        }
+        };
 
-        this.productService = new ProductService();    
+        this.state = {
+            products: [],
+            batchForm: this.batchForm,
+            batchHistoryForm: this.batchHistoryForm
+        };
+
+        this.productService = new ProductService();
+        this.batchService = new BatchService();
+        this.batchHistoryService = new BatchHistoryService();  
     }
 
     componentDidMount() {
@@ -77,43 +98,71 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
             });
     };
 
+    private AddOrUpdateBatchById = (batch: BatchFormInfo, batchHistory: BatchHistoryFormInfo) => {
+        this.batchService.AddOrUpdateBatch(batch)
+             .then((data) => {
+
+                batchHistory.batchId = data.addOrUpdateBatch.id;
+                batchHistory.quantity = data.addOrUpdateBatch.quantity;
+                batchHistory.date = new Date();
+
+                this.AddBatchHistory(batchHistory);
+             })
+             .catch((error) => {
+                 console.error(error);
+             });
+     };
+
+     private AddBatchHistory = (batchHistory: BatchHistoryFormInfo) => {
+        this.batchHistoryService.AddBatchHistory(batchHistory)
+             .then((data) => {
+                console.log(data);
+                this.props.handleNavigation();
+             })
+             .catch((error) => {
+                 console.error(error);
+             });
+     };
+
     handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        this.form.productId = parseInt(event.target.value);
+        this.batchForm.productId = parseInt(event.target.value);
         this.setState({
-            form: this.form
+            batchForm: this.batchForm
         });
     };
 
     handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const numericInput = event.target.value.replace(/[^0-9]/g, '');
-        this.form.quantity = parseInt(numericInput);
+        this.batchForm.quantity = parseInt(numericInput);
 
         this.setState({
-            form: this.form
+            batchForm: this.batchForm
         });
     };
 
     handleReasonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        this.form.type = event.target.value;
+        this.batchHistoryForm.type = event.target.value;
+
+        console.log(this.batchHistoryForm);
 
         this.setState({
-            form: this.form
+            batchHistoryForm: this.batchHistoryForm
         });
     };
 
     handleDateChange = (date: Date) => {
-        this.form.expirationDate = date;
+        this.batchForm.expirationDate = date;
 
         this.setState({
-            form: this.form
+            batchForm: this.batchForm
         });
     };
 
     handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.form.comment = event.target.value;
+        this.batchHistoryForm.comment = event.target.value;
 
         this.setState({
-            form: this.form
+            batchHistoryForm: this.batchHistoryForm
         });
     };
 
@@ -131,7 +180,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                                 <Form.Label>Type</Form.Label>
                                 <Form.Select 
                                     onChange={this.handleReasonChange}
-                                    value={this.form.type} >
+                                    value={this.batchHistoryForm.type} >
                                     <option value='ORDER_IN'>Order In</option>
                                     <option value='ORDER_OUT'>Order Out</option>
                                 </Form.Select>
@@ -140,7 +189,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                                 <Form.Label>Product</Form.Label>
                                 <Form.Select 
                                     onChange={this.handleProductChange}
-                                    value={this.form.productId} >
+                                    value={this.batchForm.productId} >
                                     <option key='0' value='' disabled>Choose product...</option>
                                     {
                                         this.state.products.map((product: any) => {
@@ -157,12 +206,12 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                                 <Form.Control 
                                     placeholder="Ex: 100" 
                                     onChange={this.handleQuantityChange}
-                                    value={this.form.quantity} />
+                                    value={this.batchForm.quantity} />
                                 </Form.Group>
                                 <Form.Group as={Col} controlId="formGridZip">
                                 <Form.Label>Expiration Date</Form.Label>
                                 <DatePicker
-                                    selected={this.form.expirationDate}
+                                    selected={this.batchForm.expirationDate}
                                     onChange={this.handleDateChange}
                                     dateFormat="dd/MM/yyyy"
                                     className="form-control"
@@ -178,7 +227,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                                     as="textarea" 
                                     style={{ height: '200px' }} 
                                     onChange={this.handleCommentChange}
-                                    value={this.form.comment} />
+                                    value={this.batchHistoryForm.comment} />
                                 </Form.Group>
                             </Row>
                         </Card.Body>
@@ -188,7 +237,10 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                                 <Button variant="danger" type="button" href="/Orders">
                                     Cancel
                                 </Button>
-                                <Button variant="success" type="submit">
+                                <Button 
+                                    variant="success" 
+                                    type="button"
+                                    onClick={() => this.AddOrUpdateBatchById(this.batchForm, this.batchHistoryForm)}>
                                     Add
                                 </Button>
                             </div>
@@ -203,13 +255,20 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
 function OrderForm() {
     const params = useParams<{ orderId?: string }>();
     const orderId = parseInt(params.orderId || '0');
+    const navigate = useNavigate();
 
-    if(orderId !== 0)
+    const handleNavigation = () => {
+        navigate('/orders');
+    }
+
+    if(orderId !== 0 || isNaN(Number(orderId)))
     {
         return <NotFound />
     }
 
-    return <OrderFormComponent id={orderId}/>
+    return <OrderFormComponent 
+                id={orderId}
+                handleNavigation={handleNavigation} />
 }
 
 export default OrderForm;

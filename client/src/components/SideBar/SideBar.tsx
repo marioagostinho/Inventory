@@ -10,7 +10,7 @@ import "./SideBar.css"
 
 
 export default function SideBar() {
-    const root = useLocation().pathname;
+    const root = useLocation().pathname.toLowerCase();
     const imagePath = window.location.origin + '/felfel-logo.png';
 
     return (
@@ -20,10 +20,10 @@ export default function SideBar() {
                 <h1>Inventory</h1>
             </div>
             <a href='/' className={root  === '/' ? 'selected' : ''}><FontAwesomeIcon icon={faHouse}></FontAwesomeIcon>Home</a>
-            <a href='/Products' className={root.includes('Product') ? 'selected' : ''}><FontAwesomeIcon icon={faUtensils}></FontAwesomeIcon>Products</a>
-            <a href='/Orders' className={root.includes('Order')  ? 'selected' : ''}><FontAwesomeIcon icon={faCartShopping}></FontAwesomeIcon>Orders</a>
-            <a href='/Batches' className={root.includes('Batch')  ? 'selected' : ''}><FontAwesomeIcon icon={faBox}></FontAwesomeIcon>Batches</a>
-            <a href='/History' className={root.includes('History')  ? 'selected' : ''}><FontAwesomeIcon icon={faClockRotateLeft}></FontAwesomeIcon>History</a>
+            <a href='/Products' className={root.includes('/products') ? 'selected' : ''}><FontAwesomeIcon icon={faUtensils}></FontAwesomeIcon>Products</a>
+            <a href='/Orders' className={root.includes('/orders')  ? 'selected' : ''}><FontAwesomeIcon icon={faCartShopping}></FontAwesomeIcon>Orders</a>
+            <a href='/Batches' className={root.includes('/batches')  ? 'selected' : ''}><FontAwesomeIcon icon={faBox}></FontAwesomeIcon>Batches</a>
+            <a href='/History' className={root.includes('/history')  ? 'selected' : ''}><FontAwesomeIcon icon={faClockRotateLeft}></FontAwesomeIcon>History</a>
       </div>
     );
 }

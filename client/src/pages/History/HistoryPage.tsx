@@ -60,10 +60,16 @@ class HistoryPage extends Component<{}, State> {
                 Value: "amount", 
                 Render: (header: ItemListHeader, item: ItemListInfo) => {
 
-                    const colorStyle: string = (parseInt(item.Value[header.Value]) < 0) ? "red" : "green";
+                    let colorStyle: string = 'red';
+                    let titleQuantity: string = item.Value[header.Value];
+
+                    if(parseInt(item.Value[header.Value]) > 0) {
+                        colorStyle = 'green';
+                        titleQuantity = `+${item.Value[header.Value]}`;
+                    }
 
                     return <td key={item.Value[header.Value]} style={{color: colorStyle, fontWeight: 'bold'}}>
-                        {item.Value[header.Value]}
+                        {titleQuantity}
                     </td>;
                 }
             },

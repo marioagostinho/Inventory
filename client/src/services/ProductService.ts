@@ -1,6 +1,7 @@
 import { ApolloClient, InMemoryCache, ApolloLink, HttpLink } from '@apollo/client';
 
 import { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_ID_QUERY } from './GraphQL/Queries/products-queries';
+import { ADD_UPDATE_PRODUCT_MUTATION } from './GraphQL/Mutations/products-mutations';
 
 export default class ProductService {
     private client: ApolloClient<any>;
@@ -41,6 +42,24 @@ export default class ProductService {
             const { data } = await this.client.query({
                 query: GET_PRODUCT_BY_ID_QUERY,
                 variables: { id }
+            })
+
+            return data;
+        } catch (error) {
+            console.error(error);
+            
+            throw error;
+        }
+    }
+
+    async AddOrUpdateProduct(newProduct: any) {
+        console.log(newProduct)
+        try {
+            const { data } = await this.client.mutate({
+                mutation: ADD_UPDATE_PRODUCT_MUTATION,
+                variables: {
+                    product: newProduct
+                }
             })
 
             return data;

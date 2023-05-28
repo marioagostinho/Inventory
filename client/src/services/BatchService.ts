@@ -1,6 +1,7 @@
 import { ApolloClient, InMemoryCache, ApolloLink, HttpLink } from '@apollo/client';
 
 import { GET_BATCHES_QUERY, GET_BATCH_BY_ID_QUERY } from './GraphQL/Queries/batches-queries';
+import { ADD_UPDATE_BATCH_MUTATION } from './GraphQL/Mutations/batches-mutations';
 
 export default class BatchService {
     private client: ApolloClient<any>;
@@ -41,6 +42,24 @@ export default class BatchService {
             const { data } = await this.client.query({
                 query: GET_BATCH_BY_ID_QUERY,
                 variables: { id }
+            })
+
+            return data;
+        } catch (error) {
+            console.error(error);
+            
+            throw error;
+        }
+    }
+
+    async AddOrUpdateBatch(newBatch: any) {
+        console.log(newBatch);
+        try {
+            const { data } = await this.client.mutate({
+                mutation: ADD_UPDATE_BATCH_MUTATION,
+                variables: {
+                    batch: newBatch
+                }
             })
 
             return data;
