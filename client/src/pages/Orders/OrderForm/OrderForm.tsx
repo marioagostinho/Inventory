@@ -121,7 +121,9 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
 
         this.batchService.AddBatchOrderOut(productId, batchHistory)
              .then((data) => {
-                this.props.handleNavigation();
+                if(data.addBatchOrderOut) {
+                    this.props.handleNavigation();
+                }
              })
              .catch((error) => {
                  console.error(error);
