@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 
+import { Spinner } from 'react-bootstrap';
 import './ItemList.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowDownShortWide } from '@fortawesome/free-solid-svg-icons';
-import { Col, Form, Row, Spinner } from 'react-bootstrap';
 
 export interface ItemListHeader {
     Title: string;
@@ -43,7 +41,7 @@ export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWar
                 </thead>
                 <tbody>
                 {
-                    Items.length > 0 && IsLoading == false &&
+                    Items.length > 0 && IsLoading === false &&
                     Items.map((item, itemIndex) => (
                         <tr key={item.Value.id}>
                             {
@@ -51,7 +49,7 @@ export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWar
                                     if (header.Render) {
                                         return header.Render(header, item);
                                     } else {
-                                    return <td scope="row"
+                                    return <td
                                         {...header.Props}
                                         {...item.Props}
                                         key={itemIndex.toString() + headerIndex.toString()}>
@@ -64,13 +62,13 @@ export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWar
                     ))
                 }
                 {
-                    Items.length == 0 && IsLoading == false &&
+                    Items.length === 0 && IsLoading === false &&
                     <tr className='NoItemsWarning'>
                         <td colSpan={Header.length}>{NoItemsWarning}</td>
                     </tr>
                 }
                 {
-                    IsLoading == true &&
+                    IsLoading === true &&
                     <tr className='NoItemsWarning'>
                         <td colSpan={Header.length}>
                             <Spinner animation="border" role="status">

@@ -10,7 +10,7 @@ import BatchService from '../../../services/BatchService';
 import BatchHistoryService from '../../../services/BatchHistoryService';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
-import NotFound from '../../NotFound/NotFound';
+import NotFound from '../../NotFound/NotFoundPage';
 
 
 interface BatchFormInfo {

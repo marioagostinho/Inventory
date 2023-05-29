@@ -9,7 +9,7 @@ import BatchService from '../../../services/BatchService';
 import BatchHistoryService from '../../../services/BatchHistoryService';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
-import NotFound from '../../NotFound/NotFound';
+import NotFound from '../../NotFound/NotFoundPage';
 
 
 interface BatchFormInfo {
@@ -129,7 +129,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     };
 
     private HandleAddAction = () => {
-        if(this.batchHistoryForm.type == "ORDER_IN") {
+        if(this.batchHistoryForm.type === "ORDER_IN") {
             this.AddOrUpdateBatchById(this.batchForm, this.batchHistoryForm);
         } else {
             this.AddBatchOrderOut(this.batchForm.productId, this.batchHistoryForm);
@@ -222,7 +222,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                                 </Form.Group>
 
                                 {
-                                    this.batchHistoryForm.type == "ORDER_IN" &&
+                                    this.batchHistoryForm.type === "ORDER_IN" &&
                                     <Form.Group as={Col} controlId="formGridZip">
                                         <Form.Label>Expiration Date</Form.Label>
                                         <DatePicker

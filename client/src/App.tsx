@@ -11,8 +11,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import Layout from './pages/_layout/Layout';
 
 //PAGES
-import Home from './pages/Home/Home';
-import NotFound from './pages/NotFound/NotFound';
+import Home from './pages/Home/HomePage';
+import NotFound from './pages/NotFound/NotFoundPage';
 import ProductsPage from './pages/Products/ProductsPage';
 import OrdersPage from './pages/Orders/OrdersPage';
 import OrderForm from './pages/Orders/OrderForm/OrderForm';

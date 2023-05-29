@@ -6,7 +6,7 @@ import { Button, Card, Col, Row } from 'react-bootstrap';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
 import ProductService from '../../../services/ProductService';
-import NotFound from '../../NotFound/NotFound';
+import NotFound from '../../NotFound/NotFoundPage';
 
 interface ProductFormItem {
     id: number;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState }  from 'react'
 import { useNavigate } from 'react-router-dom';
 
-import './NotFound.css';
+import './NotFoundPage.css';
 
 export default function NotFound() {
     const navigate = useNavigate();
