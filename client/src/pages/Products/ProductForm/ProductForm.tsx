@@ -34,7 +34,7 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
         super(props);
 
         this.formTitle = (props.id > 0) ? 'Edit Product' : 'New Product';
-        this.actionTitle = (props.id > 0) ? 'Edit' : 'Add';
+        this.actionTitle = (props.id > 0) ? 'Confirm' : 'Add';
 
         this.form = {
             id: props.id,

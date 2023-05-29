@@ -71,3 +71,8 @@ tr:hover {
 .table-sort:hover {
     color: inherit;
 }
+
+.NoItemsWarning > td {
+    text-align: center;
+    padding: 20px!important;
+}

@@ -37,7 +37,8 @@ class HistoryPage extends Component<{}, State> {
                             product: `${item.batch.product.name} (#${item.batch.id})`,
                             date: moment(item.date).format('DD/MM/YYYY HH:mm'),
                             amount: item.quantity,
-                            type: item.type
+                            type: item.type,
+                            comment: item.comment
                         }
                     } as ItemListInfo));
 
@@ -74,7 +75,8 @@ class HistoryPage extends Component<{}, State> {
                 }
             },
             { Title: "Type", Value: "type" },
-            { Title: "Date", Value: "date" }
+            { Title: "Date", Value: "date" },
+            { Title: "Comment", Value: "comment"}
         ];
         const { items } = this.state;
 
@@ -85,7 +87,7 @@ class HistoryPage extends Component<{}, State> {
             <ItemList
             Header={Header}
             Items={items}
-            />
+            NoItemsWarning='No history available' />
         </div>
         );
     }

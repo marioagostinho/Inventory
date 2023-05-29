@@ -88,11 +88,14 @@ namespace Infrastructure.Services
                 .Where(b => b.ProductId == productId && b.ExpirationDate > DateTime.Now && b.IsDeleted == false)
                 .ToListAsync();
 
+            if (quantity > batchList.Sum(b => b.Quantity))
+                return false;
+
             foreach(var batch in batchList)
             {
                 int recordedBatchQuantity = batch.Quantity;
 
-                if(batch.Quantity >= quantity)
+                if(batch.Quantity > quantity)
                 {
                     recordedBatchQuantity = -quantity;
                     batch.Quantity -= quantity;
@@ -121,11 +124,6 @@ namespace Infrastructure.Services
                 {
                     break;
                 }
-            }
-
-            if (quantity > 0)
-            {
-                return false;
             }
 
             await context.SaveChangesAsync();

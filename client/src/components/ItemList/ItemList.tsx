@@ -22,10 +22,10 @@ interface ItemListProps {
     MaxHeight?: string;
     Header: ItemListHeader[];
     Items: ItemListInfo[];
-    EditClick?: (props: any) => void;
+    NoItemsWarning?: string;
 }
 
-export default function ItemList({MaxHeight = '800px', Header, Items, EditClick}: ItemListProps) {
+export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWarning = "Table empty..."}: ItemListProps) {
     return (
         <div className='table-container' style={{maxHeight:MaxHeight}}>
             <table className="table">
@@ -42,6 +42,7 @@ export default function ItemList({MaxHeight = '800px', Header, Items, EditClick}
                 </thead>
                 <tbody>
                 {
+                    Items.length > 0 &&
                     Items.map((item, itemIndex) => (
                         <tr key={item.Value.id}>
                             {
@@ -60,6 +61,12 @@ export default function ItemList({MaxHeight = '800px', Header, Items, EditClick}
                             }
                         </tr>
                     ))
+                }
+                {
+                    Items.length == 0 &&
+                    <tr className='NoItemsWarning'>
+                        <td colSpan={Header.length}>{NoItemsWarning}</td>
+                    </tr>
                 }
                 </tbody>
             </table>  

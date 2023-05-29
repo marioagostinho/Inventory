@@ -114,12 +114,14 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
                                 <Tab.Pane eventKey="first">
                                 <ItemList 
                                     Header={Header}
-                                    Items={inItems} />
+                                    Items={inItems} 
+                                    NoItemsWarning="No orders in"/>
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="second">
                                 <ItemList 
                                     Header={Header}
-                                    Items={outItems} />
+                                    Items={outItems} 
+                                    NoItemsWarning="No orders out" />
                                 </Tab.Pane>
                             </Tab.Content>
                         </Col>

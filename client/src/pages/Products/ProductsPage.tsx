@@ -141,6 +141,7 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
             <ItemList
                 Header={Header}
                 Items={this.state.items}
+                NoItemsWarning="No products available"
              />
 
              <DeleteModal 

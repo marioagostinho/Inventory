@@ -284,7 +284,7 @@ function OrderForm() {
 
     return <OrderFormComponent 
                 id={orderId}
-                handleNavigation={handleNavigation} />
+                handleNavigation={handleNavigation}/>
 }
 
 export default OrderForm;

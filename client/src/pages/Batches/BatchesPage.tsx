@@ -127,6 +127,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                 <ItemList
                     Header={Header}
                     Items={this.state.items}
+                    NoItemsWarning='No batches available'
                 />
 
                 <DeleteModal 

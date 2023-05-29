@@ -262,7 +262,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                                     variant="success"
                                     type="button"
                                     onClick={() => this.AddOrUpdateBatchById(this.batchForm, this.batchHistoryForm)}>
-                                    Add
+                                    Confirm
                                 </Button>
                             </div>
                         </Card.Footer>
