@@ -18,13 +18,20 @@ namespace Infrastructure.Services
 
         public IQueryable<BatchHistory> GetBatchHistories()
         {
-            var context = _dbContext.CreateDbContext();
-            context.Database.EnsureCreated();
+            try
+            {
+                var context = _dbContext.CreateDbContext();
+                context.Database.EnsureCreated();
 
-            return context.BatchesHistory
-                .OrderByDescending(b => b.Id)
-                .Include(b => b.Batch)
-                .Include(b => b.Batch.Product);
+                return context.BatchesHistory
+                    .OrderByDescending(b => b.Id)
+                    .Include(b => b.Batch)
+                    .Include(b => b.Batch.Product);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error in GetBatchHistories: {ex.Message}");
+            }
         }
     }
 }
