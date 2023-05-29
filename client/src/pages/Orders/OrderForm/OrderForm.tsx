@@ -147,6 +147,10 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
         const numericInput = event.target.value.replace(/[^0-9]/g, '');
         this.batchForm.quantity = parseInt(numericInput);
 
+        if(isNaN(this.batchForm.quantity)) {
+            this.batchForm.quantity = 0;
+        }
+
         this.setState({
             batchForm: this.batchForm
         });
@@ -154,8 +158,6 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
 
     handleReasonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         this.batchHistoryForm.type = event.target.value;
-
-        console.log(this.batchHistoryForm);
 
         this.setState({
             batchHistoryForm: this.batchHistoryForm

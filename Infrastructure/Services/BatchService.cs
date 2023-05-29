@@ -1,4 +1,5 @@
 ﻿using Core.Enums;
+using Core.Helpers;
 using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
@@ -24,6 +25,7 @@ namespace Infrastructure.Services
 
                 return context.Batches
                     .Where(b => !b.IsDeleted && b.Quantity > 0)
+                    .OrderByDescending(b => b.Id)
                     .Include(b => b.Product);
             }
             catch (Exception ex)

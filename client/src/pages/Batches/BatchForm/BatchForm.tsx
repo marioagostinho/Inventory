@@ -151,6 +151,10 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
         const numericInput = event.target.value.replace(/[^0-9]/g, '');
         this.batchForm.quantity = parseInt(numericInput);
 
+        if(isNaN(this.batchForm.quantity)) {
+            this.batchForm.quantity = 0;
+        }
+
         this.setState({
             batchForm: this.batchForm
         });

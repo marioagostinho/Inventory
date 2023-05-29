@@ -23,7 +23,8 @@ namespace Infrastructure.Services
                 context.Database.EnsureCreated();
 
                 return context.Products
-                    .Where(b => !b.IsDeleted);
+                    .Where(b => !b.IsDeleted)
+                    .OrderByDescending(b => b.Id);
             }
             catch (Exception ex)
             {

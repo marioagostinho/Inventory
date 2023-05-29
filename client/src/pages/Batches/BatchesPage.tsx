@@ -52,7 +52,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                             id: item.id,
                             product: item.product.name,
                             quantity: item.quantity,
-                            expirationDate: moment(item.expirationDate).format('DD/MM/YYYY')
+                            expirationDate: item.expirationDate
                         }
                     } as ItemListInfo));
 
@@ -105,7 +105,31 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
             { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} }},
             { Title: "Product", Value: "product" },
             { Title: "Quantity", Value: "quantity" },
-            { Title: "Expiration Date", Value: "expirationDate" },
+            { 
+                Title: "Expiration Date",
+                Value: "expirationDate",
+                Render: (header: ItemListHeader, item: ItemListInfo) => {
+                    let colorStyle: string = 'green';
+                    let productSate: string = 'fresh';
+                    
+                    const today = new Date().setHours(0, 0, 0, 0);
+                    const productDate = new Date(item.Value[header.Value]).setHours(0, 0, 0, 0);
+
+                    if(productDate == today) {
+                        colorStyle = '#ffcc33';
+                        productSate = 'expiring today';
+                    } else if(productDate < today) {
+                        colorStyle = 'red';
+                        productSate = 'expired';
+                    }
+
+                    return (
+                        <td key={header.Value} style={{color: colorStyle, fontWeight: 'bold'}}>
+                            {`${moment(item.Value[header.Value]).format('DD/MM/YYYY')} (${productSate})`}
+                        </td>
+                    );
+                }
+            },
             {
                 Title: "",
                 Value: "",
