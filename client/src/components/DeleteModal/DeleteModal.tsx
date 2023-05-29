@@ -12,6 +12,7 @@ interface DeleteModalProps {
     name: string;
     isVisible: boolean;
     changeVisibility: (newVisibility: boolean) => void;
+    deleteAction: (id: number) => void;
 }
 
 class DeleteModal extends Component<DeleteModalProps> {
@@ -38,10 +39,12 @@ class DeleteModal extends Component<DeleteModalProps> {
                         Are you sure that you want to delete <b>{this.props.name}</b>?
                     </Modal.Body>
                     <Modal.Footer>
-                    <Button variant="secondary" onClick={() => this.props.changeVisibility(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="danger">Delete</Button>
+                        <Button variant="secondary" onClick={() => this.props.changeVisibility(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={() => this.props.deleteAction(this.props.id)}>
+                            Delete
+                        </Button>
                     </Modal.Footer>
                 </Modal>
             </div>

@@ -69,7 +69,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             batchId: 0,
             quantity: 0,
             date: new Date() || null,
-            type: '',
+            type: 'DEFECT',
             comment: ''
         };
 
@@ -104,7 +104,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
     };
 
     private fetchBatchById = (id: number) => {
-        this.BatchService.GetBatcById(id)
+        this.BatchService.GetBatchById(id)
             .then((data) => {
                 if(data && data.batches) {
                     this.OriginalQuantity = data.batches[0].quantity;
@@ -128,29 +128,16 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
     };
 
     private AddOrUpdateBatchById = (batch: BatchFormInfo, batchHistory: BatchHistoryFormInfo) => {
-        this.BatchService.AddOrUpdateBatch(batch)
-            .then((data) => {
-                batchHistory.batchId = data.addOrUpdateBatch.id;
-                batchHistory.quantity = data.addOrUpdateBatch.quantity - this.OriginalQuantity;
-                batchHistory.date = new Date();
+        batchHistory.quantity = batch.quantity - this.OriginalQuantity;
+        batchHistory.date = new Date();
 
-                this.AddBatchHistory(batchHistory);
+        this.BatchService.AddOrUpdateBatch(batch, batchHistory)
+            .then((data) => {
+                this.props.handleNavigation();
             })
             .catch((error) => {
                 console.error(error);
             });
-    };
-
-    private AddBatchHistory = (batchHistory: BatchHistoryFormInfo) => {
-        this.batchHistoryService.AddBatchHistory(batchHistory)
-                .then((data) => {
-                    
-
-                    this.props.handleNavigation();
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
     };
 
     handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -246,7 +233,6 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                                 <Form.Select 
                                     onChange={this.handleReasonChange}
                                     value={this.batchHistoryForm.type}>
-                                    <option key="" value="">Choose a reason...</option>
                                     <option key="DEFECT" value="DEFECT">Defect</option>
                                     <option key="LOST" value="LOST">Lost</option>
                                     <option key="OTHER" value="OTHER">Other</option>

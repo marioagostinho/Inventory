@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button, Card, Col, Form, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import moment from 'moment';
 
 import ProductService from '../../../services/ProductService';
 import BatchService from '../../../services/BatchService';
@@ -88,6 +87,9 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
         this.productService.GetProducts()
             .then((data) => {
                 if(data && data.products) {
+
+                    this.batchForm.productId = data.products[0].id;
+
                     this.setState({
                         products: data.products
                     });
@@ -99,30 +101,40 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     };
 
     private AddOrUpdateBatchById = (batch: BatchFormInfo, batchHistory: BatchHistoryFormInfo) => {
-        this.batchService.AddOrUpdateBatch(batch)
+
+        batchHistory.quantity = batch.quantity;
+        batchHistory.date = new Date();
+
+        this.batchService.AddOrUpdateBatch(batch, batchHistory)
              .then((data) => {
-
-                batchHistory.batchId = data.addOrUpdateBatch.id;
-                batchHistory.quantity = data.addOrUpdateBatch.quantity;
-                batchHistory.date = new Date();
-
-                this.AddBatchHistory(batchHistory);
-             })
-             .catch((error) => {
-                 console.error(error);
-             });
-     };
-
-     private AddBatchHistory = (batchHistory: BatchHistoryFormInfo) => {
-        this.batchHistoryService.AddBatchHistory(batchHistory)
-             .then((data) => {
-                console.log(data);
                 this.props.handleNavigation();
              })
              .catch((error) => {
                  console.error(error);
              });
-     };
+    };
+
+    private AddBatchOrderOut = (productId: number, batchHistory: BatchHistoryFormInfo) => {
+
+        batchHistory.quantity = this.batchForm.quantity;
+        batchHistory.date = new Date();
+
+        this.batchService.AddBatchOrderOut(productId, batchHistory)
+             .then((data) => {
+                this.props.handleNavigation();
+             })
+             .catch((error) => {
+                 console.error(error);
+             });
+    };
+
+    private HandleAddAction = () => {
+        if(this.batchHistoryForm.type == "ORDER_IN") {
+            this.AddOrUpdateBatchById(this.batchForm, this.batchHistoryForm);
+        } else {
+            this.AddBatchOrderOut(this.batchForm.productId, this.batchHistoryForm);
+        }
+    }
 
     handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         this.batchForm.productId = parseInt(event.target.value);
@@ -202,22 +214,26 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
 
                             <Row className="mb-3">
                                 <Form.Group as={Col} controlId="formGridCity">
-                                <Form.Label>Quantity</Form.Label>
-                                <Form.Control 
-                                    placeholder="Ex: 100" 
-                                    onChange={this.handleQuantityChange}
-                                    value={this.batchForm.quantity} />
+                                    <Form.Label>Quantity</Form.Label>
+                                    <Form.Control 
+                                        placeholder="Ex: 100" 
+                                        onChange={this.handleQuantityChange}
+                                        value={this.batchForm.quantity} />
                                 </Form.Group>
-                                <Form.Group as={Col} controlId="formGridZip">
-                                <Form.Label>Expiration Date</Form.Label>
-                                <DatePicker
-                                    selected={this.batchForm.expirationDate}
-                                    onChange={this.handleDateChange}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control"
-                                    popperPlacement="bottom-end"
-                                />
-                                </Form.Group>
+
+                                {
+                                    this.batchHistoryForm.type == "ORDER_IN" &&
+                                    <Form.Group as={Col} controlId="formGridZip">
+                                        <Form.Label>Expiration Date</Form.Label>
+                                        <DatePicker
+                                            selected={this.batchForm.expirationDate}
+                                            onChange={this.handleDateChange}
+                                            dateFormat="dd/MM/yyyy"
+                                            className="form-control"
+                                            popperPlacement="bottom-end"
+                                        />
+                                    </Form.Group>
+                                }
                             </Row>
 
                             <Row className="mb-3">
@@ -240,7 +256,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                                 <Button 
                                     variant="success" 
                                     type="button"
-                                    onClick={() => this.AddOrUpdateBatchById(this.batchForm, this.batchHistoryForm)}>
+                                    onClick={this.HandleAddAction}>
                                     Add
                                 </Button>
                             </div>

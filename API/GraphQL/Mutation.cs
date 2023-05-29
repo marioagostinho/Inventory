@@ -12,15 +12,15 @@ namespace API.GraphQL
         }
 
         //GraphQL: Add or Update Batch base on the ID
-        public async Task<Batch> AddOrUpdateBatch([Service] IBatchService batchService, Batch batch)
+        public async Task<Batch> AddOrUpdateBatch([Service] IBatchService batchService, Batch batch, BatchHistory batchHistory)
         {
-            return await batchService.AddOrUpdateBatchAsync(batch);
+            return await batchService.AddOrUpdateBatchAsync(batch, batchHistory);
         }
 
-        //GraphQL: Add History Batch
-        public async Task<BatchHistory> AddBatchHistory([Service] IBatchHistoryService batchHistoryService, BatchHistory batchHistory)
+        //GraphQL: Add or Update Batch base on the ID
+        public async Task<bool> AddBatchOrderOut([Service] IBatchService batchService, int productId, BatchHistory batchHistory)
         {
-            return await batchHistoryService.AddBatchHistory(batchHistory);
+            return await batchService.AddBatchOrderOutAsync(productId, batchHistory);
         }
 
         //GraphQL: Delete product by id

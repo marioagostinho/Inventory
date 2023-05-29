@@ -80,6 +80,7 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
                 console.error(error);
             });
     };
+    
 
     handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         this.form.name = event.target.value;

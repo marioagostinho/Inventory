@@ -39,14 +39,18 @@ namespace Infrastructure.Data
             modelBuilder.Entity<Batch>().HasData(
                 new Batch(1, 1, 1000, new DateTime(2023,12,30), false),
                 new Batch(2, 2, 500, new DateTime(2024, 04, 30), false),
-                new Batch(3, 3, 150, new DateTime(2024, 12, 30), false)
+                new Batch(3, 3, 150, new DateTime(2024, 12, 30), false),
+                new Batch(4, 1, 1000, new DateTime(2023, 12, 30), false),
+                new Batch(5, 1, 1000, new DateTime(2023, 12, 30), false)
             );
 
             //Inject BatchHistory data in the inMemory database
             modelBuilder.Entity<BatchHistory>().HasData(
                 new BatchHistory(1, 1, 1000, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier"),
                 new BatchHistory(2, 2, 500, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier"),
-                new BatchHistory(3, 3, 150, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier")
+                new BatchHistory(3, 3, 150, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier"),
+                new BatchHistory(4, 1, 1000, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier"),
+                new BatchHistory(5, 1, 1000, new DateTime(2022, 01, 10), EHistoryType.OrderIn, "Arrived order from supplier")
             );
         }
     }

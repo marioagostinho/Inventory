@@ -35,7 +35,7 @@ class HistoryPage extends Component<{}, State> {
                         Value: {
                             id: item.id,
                             product: `${item.batch.product.name} (#${item.batch.id})`,
-                            date: moment(item.date).format('DD/MM/YYYY'),
+                            date: moment(item.date).format('DD/MM/YYYY HH:mm'),
                             amount: item.quantity,
                             type: item.type
                         }

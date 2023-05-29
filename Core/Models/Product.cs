@@ -15,7 +15,7 @@ namespace Core.Models
             IsDeleted = isDeleted;
         }
 
-        public Product(int id, string name, bool isDeleted)
+        public Product(int? id, string name, bool isDeleted)
         {
             Id = id;
             Name = name;

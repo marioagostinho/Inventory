@@ -48,7 +48,7 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
         this.fetchProducts();
     }
 
-    fetchProducts = () => {
+    private fetchProducts = () => {
         this.productService
         .GetProducts()
         .then((data) => {
@@ -68,6 +68,23 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
         });
     };
 
+    private DeleteProductById = (id: number) => {
+        this.productService.DeleteProductById(id)
+             .then((data) => {
+                console.log(data);
+
+                var updatedItems = this.state.items.filter((item) => item.Value.id !== id);
+
+                this.setState({
+                    items: updatedItems,
+                    isModalVisible: false
+                });
+             })
+             .catch((error) => {
+                 console.error(error);
+             });
+     };
+
     onAction = (newItem: ItemListInfo) => {
         this.item = newItem;
     }
@@ -75,10 +92,9 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
     deleteAction = (id: number, name: string) => {
         this.setState({
             productId: id,
-            productName: name
-        })
-
-        this.handleModalVisibility(true);
+            productName: name,
+            isModalVisible: true
+        });
     }
 
     handleModalVisibility = (newVisibility: boolean) => {
@@ -88,7 +104,6 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
     }
 
     render() {
-        const { items } = this.state;
         const { AddClick } = this.props;
 
         const Header: ItemListHeader[] = [
@@ -125,14 +140,15 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
             {/* Products Table */}
             <ItemList
                 Header={Header}
-                Items={items}
+                Items={this.state.items}
              />
 
              <DeleteModal 
                 id={this.state.productId}
                 name={this.state.productName}
                 isVisible={this.state.isModalVisible} 
-                changeVisibility={this.handleModalVisibility}/>
+                changeVisibility={this.handleModalVisibility}
+                deleteAction={this.DeleteProductById}/>
 
         </div>
         );

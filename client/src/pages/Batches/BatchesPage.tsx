@@ -17,7 +17,7 @@ interface BatchesComponentState {
 }
 
 interface BatchesComponentProps {
-    EditClick: (path: string) => void;
+    handleNavigation: (path: string) => void;
 }
 
 class BatchesPageComponent extends Component<BatchesComponentProps, BatchesComponentState> {
@@ -40,7 +40,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
         this.fetchBatches();
     }
 
-    fetchBatches = () => {
+    private fetchBatches = () => {
         this.batchService
             .GetBatches()
             .then((data) => {
@@ -62,13 +62,27 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
             });
     };
 
+    private DeleteBatchById = (id: number) => {
+        this.batchService.DeleteBatchById(id)
+             .then((data) => {
+                var updatedItems = this.state.items.filter((item) => item.Value.id !== id);
+
+                this.setState({
+                    items: updatedItems,
+                    isModalVisible: false
+                });
+             })
+             .catch((error) => {
+                 console.error(error);
+             });
+     };
+
     deleteAction = (id: number, name: string) => {
         this.setState({
             batchId: id,
-            batchName: name
+            batchName: name,
+            isModalVisible: true
         })
-
-        this.handleModalVisibility(true);
     }
 
     handleModalVisibility = (newVisibility: boolean) => {
@@ -105,7 +119,6 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                 }
             }
         ];
-        const { items } = this.state;
 
         return (
             <div className='batches-content'>
@@ -113,14 +126,15 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
 
                 <ItemList
                     Header={Header}
-                    Items={items}
+                    Items={this.state.items}
                 />
 
                 <DeleteModal 
                     id={this.state.batchId}
                     name={this.state.batchName}
                     isVisible={this.state.isModalVisible} 
-                    changeVisibility={this.handleModalVisibility}/>
+                    changeVisibility={this.handleModalVisibility}
+                    deleteAction={this.DeleteBatchById}/>
             </div>
         );
     }
@@ -129,11 +143,11 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
 function BatchesPage() {
     const navigate = useNavigate();
 
-    const EditClick = (id:any) => {
+    const handleNavigation = (id:any) => {
         navigate(`/batches/${id}`);
     };
 
-    return <BatchesPageComponent EditClick={EditClick} />;
+    return <BatchesPageComponent handleNavigation={handleNavigation} />;
 }
 
 export default BatchesPage;

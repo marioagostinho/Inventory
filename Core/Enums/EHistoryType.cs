@@ -6,6 +6,7 @@
         OrderOut,
         Defect,
         Lost,
-        Other
+        Other,
+        Deleted
     }
 }

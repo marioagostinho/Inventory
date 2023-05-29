@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using Core.Enums;
+using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -83,6 +84,16 @@ namespace Infrastructure.Services
             foreach(var batch in batches) 
             {
                 batch.IsDeleted = true;
+
+                BatchHistory NewBatchHistory = new BatchHistory(
+                    batch.Id,
+                    -batch.Quantity,
+                    DateTime.Now,
+                    EHistoryType.Deleted,
+                    "Batch deleted"
+                );
+
+                context.BatchesHistory.Add(NewBatchHistory);
             }
 
             context.Products.Update(product);
