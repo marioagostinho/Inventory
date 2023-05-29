@@ -1,9 +1,7 @@
-﻿using Core.Enums;
-using Core.Interfaces;
+﻿using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructure.Services
 {

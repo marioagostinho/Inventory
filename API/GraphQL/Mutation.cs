@@ -1,7 +1,6 @@
 ﻿using Core.Helpers;
 using Core.Interfaces;
 using Core.Models;
-using System.ComponentModel.DataAnnotations;
 
 namespace API.GraphQL
 {
