@@ -76,3 +76,7 @@ tr:hover {
     text-align: center;
     padding: 20px!important;
 }
+
+.NoItemsWarning > td:hover {
+    background-color: white;
+}

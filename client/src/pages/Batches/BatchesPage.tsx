@@ -14,6 +14,7 @@ interface BatchesComponentState {
     batchId: number;
     batchName: string;
     isModalVisible: boolean;
+    isItemListLoading: boolean;
 }
 
 interface BatchesComponentProps {
@@ -30,7 +31,8 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
             items: [],
             batchId: 0,
             batchName: '',
-            isModalVisible: false
+            isModalVisible: false,
+            isItemListLoading: true
         }
 
         this.batchService = new BatchService();
@@ -54,11 +56,18 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                         }
                     } as ItemListInfo));
 
-                    this.setState({ items });
+                    this.setState({ 
+                        items,
+                        isItemListLoading: false
+                    });
                 }
             })
             .catch((error) => {
                 console.error(error);
+
+                this.setState({
+                    isItemListLoading: false
+                })
             });
     };
 
@@ -128,7 +137,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                     Header={Header}
                     Items={this.state.items}
                     NoItemsWarning='No batches available'
-                />
+                    IsLoading={this.state.isItemListLoading} />
 
                 <DeleteModal 
                     id={this.state.batchId}

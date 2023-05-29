@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './ItemList.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowDownShortWide } from '@fortawesome/free-solid-svg-icons';
-import { Col, Form, Row } from 'react-bootstrap';
+import { Col, Form, Row, Spinner } from 'react-bootstrap';
 
 export interface ItemListHeader {
     Title: string;
@@ -23,9 +23,10 @@ interface ItemListProps {
     Header: ItemListHeader[];
     Items: ItemListInfo[];
     NoItemsWarning?: string;
+    IsLoading?: boolean;
 }
 
-export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWarning = "Table empty..."}: ItemListProps) {
+export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWarning = "Table empty...", IsLoading = false}: ItemListProps) {
     return (
         <div className='table-container' style={{maxHeight:MaxHeight}}>
             <table className="table">
@@ -42,7 +43,7 @@ export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWar
                 </thead>
                 <tbody>
                 {
-                    Items.length > 0 &&
+                    Items.length > 0 && IsLoading == false &&
                     Items.map((item, itemIndex) => (
                         <tr key={item.Value.id}>
                             {
@@ -63,9 +64,19 @@ export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWar
                     ))
                 }
                 {
-                    Items.length == 0 &&
+                    Items.length == 0 && IsLoading == false &&
                     <tr className='NoItemsWarning'>
                         <td colSpan={Header.length}>{NoItemsWarning}</td>
+                    </tr>
+                }
+                {
+                    IsLoading == true &&
+                    <tr className='NoItemsWarning'>
+                        <td colSpan={Header.length}>
+                            <Spinner animation="border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                        </td>
                     </tr>
                 }
                 </tbody>

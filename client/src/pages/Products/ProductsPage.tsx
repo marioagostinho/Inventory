@@ -15,6 +15,7 @@ interface ProductsComponentState {
     productId: number;
     productName: string;
     isModalVisible: boolean;
+    isItemListLoading: boolean;
 }
 
 interface ProductsComponentProps {
@@ -38,7 +39,8 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
             items: [],
             productId: 0,
             productName: '',
-            isModalVisible: false
+            isModalVisible: false,
+            isItemListLoading: true
         };
 
         this.productService = new ProductService();
@@ -60,7 +62,10 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
                     }
                 } as ItemListInfo));
 
-                this.setState({ items });
+                this.setState({
+                    items,
+                    isItemListLoading: false
+                });
             }
         })
         .catch((error) => {
@@ -82,6 +87,10 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
              })
              .catch((error) => {
                  console.error(error);
+
+                 this.setState({
+                    isItemListLoading: false
+                 });
              });
      };
 
@@ -141,8 +150,8 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
             <ItemList
                 Header={Header}
                 Items={this.state.items}
-                NoItemsWarning="No products available"
-             />
+                NoItemsWarning="No products available" 
+                IsLoading={this.state.isItemListLoading}/>
 
              <DeleteModal 
                 id={this.state.productId}

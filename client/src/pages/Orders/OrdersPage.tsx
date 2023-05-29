@@ -17,6 +17,8 @@ interface OrdersComponentProps {
 interface State {
     inItems: any[];
     outItems: any[];
+    isOrderInListLoading: boolean;
+    isOrderOutListLoading: boolean;
 }
 
 class OrdersPageComponent extends Component<OrdersComponentProps, State> {
@@ -27,7 +29,9 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
 
         this.state = {
             inItems: [],
-            outItems: []
+            outItems: [],
+            isOrderInListLoading: true,
+            isOrderOutListLoading: true
         }
 
         this.batchHistoryService = new BatchHistoryService();
@@ -54,7 +58,9 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
                     } as ItemListInfo));
 
                     const updatedState = {
-                        [targetState]: items
+                        [targetState]: items,
+                        isOrderInListLoading: false,
+                        isOrderOutListLoading: false
                     } as Pick<State, keyof State>;
               
                     this.setState(updatedState);
@@ -115,13 +121,15 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
                                 <ItemList 
                                     Header={Header}
                                     Items={inItems} 
-                                    NoItemsWarning="No orders in"/>
+                                    NoItemsWarning="No orders in"
+                                    IsLoading={this.state.isOrderInListLoading} />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="second">
                                 <ItemList 
                                     Header={Header}
                                     Items={outItems} 
-                                    NoItemsWarning="No orders out" />
+                                    NoItemsWarning="No orders out" 
+                                    IsLoading={this.state.isOrderOutListLoading} />
                                 </Tab.Pane>
                             </Tab.Content>
                         </Col>

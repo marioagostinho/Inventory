@@ -7,6 +7,7 @@ import moment from 'moment';
 
 interface State {
     items: [];
+    isItemListLoading: boolean;
 }
 
 class HistoryPage extends Component<{}, State> {
@@ -16,7 +17,8 @@ class HistoryPage extends Component<{}, State> {
         super(props);
 
         this.state = {
-            items: []
+            items: [],
+            isItemListLoading: true
         }
 
         this.batchHistoryService = new BatchHistoryService();
@@ -42,11 +44,18 @@ class HistoryPage extends Component<{}, State> {
                         }
                     } as ItemListInfo));
 
-                    this.setState({ items });
+                    this.setState({ 
+                        items,
+                        isItemListLoading: false
+                    });
                 }
             })
             .catch((error) => {
                 console.error(error);
+
+                this.setState({
+                    isItemListLoading: false
+                });
             });
     };
 
@@ -76,7 +85,11 @@ class HistoryPage extends Component<{}, State> {
             },
             { Title: "Type", Value: "type" },
             { Title: "Date", Value: "date" },
-            { Title: "Comment", Value: "comment"}
+            { 
+                Title: "Comment",
+                Value: "comment", 
+                Props: {style:{overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis', maxWidth:'350px'}}
+            }
         ];
         const { items } = this.state;
 
@@ -87,7 +100,8 @@ class HistoryPage extends Component<{}, State> {
             <ItemList
             Header={Header}
             Items={items}
-            NoItemsWarning='No history available' />
+            NoItemsWarning='No history available' 
+            IsLoading={this.state.isItemListLoading}/>
         </div>
         );
     }
