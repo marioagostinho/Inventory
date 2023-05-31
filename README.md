@@ -5,7 +5,7 @@
 <br />
 
 <p align="center">
-  <img src="https://github.com/marioagostinho/Inventory/blob/master/InventoryLogo.PNG" />
+  <img src="https://github.com/marioagostinho/Inventory/blob/main/InventoryLogo.PNG" />
 </p>
 
 <br />
