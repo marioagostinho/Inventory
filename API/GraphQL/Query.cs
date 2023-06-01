@@ -6,21 +6,21 @@ namespace API.GraphQL
     public class Query
     {
         [UseFiltering]
-        public IQueryable<Product> GetProducts([Service] IProductService productService)
+        public async Task<IQueryable<Product>> GetProducts([Service] IProductService productService)
         {
-            return productService.GetProducts();
+            return  await productService.GetProductsAsync();
         }
 
         [UseFiltering]
-        public IQueryable<Batch> GetBatches([Service] IBatchService batchService)
+        public async Task<IQueryable<Batch>> GetBatchesAsync([Service] IBatchService batchService)
         {
-            return batchService.GetBatches();
+            return await batchService.GetBatchesAsync();
         }
 
         [UseFiltering]
-        public IQueryable<BatchHistory> GetBatchHistories([Service] IBatchHistoryService batchHistoryService)
+        public async Task<IQueryable<BatchHistory>> GetBatchHistories([Service] IBatchHistoryService batchHistoryService)
         {
-            return batchHistoryService.GetBatchHistories();
+            return await batchHistoryService.GetBatchHistorieAsync();
         }
     }
 }

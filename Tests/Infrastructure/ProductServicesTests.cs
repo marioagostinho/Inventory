@@ -11,8 +11,8 @@ namespace Tests.Infrastructure
     [TestFixture]
     public class ProductServicesTests
     {
-        private IProductService productService;
-        private InventoryDbContext dbContext;
+        private IProductService _productService;
+        private InventoryDbContext _dbContext;
 
         [SetUp]
         public void SetUp()
@@ -28,21 +28,14 @@ namespace Tests.Infrastructure
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
-            dbContext = new InventoryDbContext(options);
-            productService = new ProductService(new DbContextFactoryMock(dbContext));
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            // Clear the database after each test
-            dbContext.Database.EnsureDeleted();
+            _dbContext = new InventoryDbContext(options);
+            _productService = new ProductService(new DbContextFactoryMock(_dbContext));
         }
 
         #region GetProducts
 
         [Test]
-        public void GetProducts_Returns_All_NonDeleted_Products()
+        public async Task GetProducts_Returns_All_NonDeleted_ProductsAsync()
         {
             // Arrange
             var products = new List<Product>
@@ -52,11 +45,11 @@ namespace Tests.Infrastructure
                 new Product("Product 3", true) // Deleted product
             };
 
-            dbContext.Products.AddRange(products);
-            dbContext.SaveChanges();
+            _dbContext.Products.AddRange(products);
+            _dbContext.SaveChanges();
 
             // Act
-            var result = productService.GetProducts();
+            var result = await _productService.GetProductsAsync();
 
             // Assert
             // Test if GetProducts() return all non deleted products(2)
@@ -77,7 +70,7 @@ namespace Tests.Infrastructure
             var product = new Product("New Product", false);
 
             // Act
-            var result = await productService.AddOrUpdateProductAsync(product);
+            var result = await _productService.AddOrUpdateProductAsync(product);
 
             // Assert
             //Test if AddOrUpdateProductAsync() added product isn't null
@@ -93,13 +86,13 @@ namespace Tests.Infrastructure
         {
             // Arrange
             var existingProduct = new Product("Existing Product", false);
-            dbContext.Products.Add(existingProduct);
-            dbContext.SaveChanges();
+            _dbContext.Products.Add(existingProduct);
+            _dbContext.SaveChanges();
 
             var updatedProduct = new Product(existingProduct.Id, "Updated Product", true);
 
             // Act
-            var result = await productService.AddOrUpdateProductAsync(updatedProduct);
+            var result = await _productService.AddOrUpdateProductAsync(updatedProduct);
 
             // Assert
             //Test if AddOrUpdateProductAsync() updated product has the same name as the one passed
@@ -116,7 +109,7 @@ namespace Tests.Infrastructure
 
             // Act & Assert
             // Test if AddOrUpdateProductAsync() throw an exception
-            Assert.ThrowsAsync<Exception>(async () => await productService.AddOrUpdateProductAsync(product));
+            Assert.ThrowsAsync<Exception>(async () => await _productService.AddOrUpdateProductAsync(product));
         }
 
         #endregion
@@ -133,27 +126,27 @@ namespace Tests.Infrastructure
             var batch1 = new Batch(productId, 10, DateTime.Now, false);
             var batch2 = new Batch(productId, 5, DateTime.Now, false);
 
-            dbContext.Products.Add(product);
-            dbContext.Batches.AddRange(batch1, batch2);
-            dbContext.SaveChanges();
+            _dbContext.Products.Add(product);
+            _dbContext.Batches.AddRange(batch1, batch2);
+            _dbContext.SaveChanges();
 
             // Act
-            var result = await productService.DeleteProductAsync(productId);
+            var result = await _productService.DeleteProductAsync(productId);
 
             // Assert
             // Test if DeleteProductAsync() deleted the product
             Assert.IsTrue(result);
 
             // Test if the deleted product how has the IsDeleted equal true
-            var deletedProduct = dbContext.Products.Find(productId);
+            var deletedProduct = _dbContext.Products.Find(productId);
             Assert.That(deletedProduct.IsDeleted, Is.True);
 
             // Test if DeleteProductAsync() deleted all it's batches
-            var deletedBatches = dbContext.Batches.Where(b => b.ProductId == productId).ToList();
+            var deletedBatches = _dbContext.Batches.Where(b => b.ProductId == productId).ToList();
             Assert.IsTrue(deletedBatches.All(b => b.IsDeleted));
 
             // Test if DeleteProductAsync() created an history for the deleted batches
-            var batchHistories = dbContext.BatchesHistory.ToList();
+            var batchHistories = _dbContext.BatchesHistory.ToList();
             Assert.That(batchHistories.Count, Is.EqualTo(2));
         }
     }

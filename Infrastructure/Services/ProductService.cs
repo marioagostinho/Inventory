@@ -15,20 +15,35 @@ namespace Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public IQueryable<Product> GetProducts()
+        public async Task<IQueryable<Product>> GetProductsAsync()
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
+                {
+                    //Ensure that is created cause is InMemory
+                    await context.Database.EnsureCreatedAsync();
 
-                return context.Products
-                    .Where(b => !b.IsDeleted)
-                    .OrderByDescending(b => b.Id);
+                    //Get list of Products
+                    //That aren't deleted
+                    var products = await context.Products
+                        .Where(b => !b.IsDeleted)
+                        .OrderByDescending(b => b.Id)
+                        .ToListAsync();
+
+                    if(products == null)
+                    {
+                        throw new Exception("Error in GetProductsAsync: Products are null");
+                    }
+
+                    //Convert products to IQueryable
+                    return products.AsQueryable();
+                } 
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error in GetProducts: {ex.Message}");
+                throw new Exception($"Error in GetProductsAsync: {ex.Message}");
             }
         }
 

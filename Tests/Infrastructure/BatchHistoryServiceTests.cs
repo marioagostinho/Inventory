@@ -12,8 +12,8 @@ namespace Tests.Infrastructure
     [TestFixture]
     public class BatchHistoryServiceTests
     {
-        private IBatchHistoryService batchHistoryService; 
-        private InventoryDbContext dbContext;
+        private IBatchHistoryService _batchHistoryService; 
+        private InventoryDbContext _dbContext;
 
         [SetUp]
         public void Setup()
@@ -29,15 +29,8 @@ namespace Tests.Infrastructure
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
-            dbContext = new InventoryDbContext(options);
-            batchHistoryService = new BatchHistoryService(new DbContextFactoryMock(dbContext));
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            // Clear the database after each test
-            dbContext.Database.EnsureDeleted();
+            _dbContext = new InventoryDbContext(options);
+            _batchHistoryService = new BatchHistoryService(new DbContextFactoryMock(_dbContext));
         }
 
         # region GetBatchHistories
@@ -47,10 +40,10 @@ namespace Tests.Infrastructure
         {
             // Arrange
             var product = new Product("Pasta", false);
-            dbContext.Products.Add(product);
+            _dbContext.Products.Add(product);
 
             var batch = new Batch(product.Id, 10, DateTime.Now.AddDays(30), false);
-            dbContext.Batches.AddRange(batch);
+            _dbContext.Batches.AddRange(batch);
 
             var batchHistories = new List<BatchHistory>
             {
@@ -59,11 +52,11 @@ namespace Tests.Infrastructure
                 new BatchHistory(batch.Id, 30, DateTime.Now, EHistoryType.Deleted, "Batch deleted")
             };
 
-            dbContext.BatchesHistory.AddRange(batchHistories);
-            dbContext.SaveChanges();
+            _dbContext.BatchesHistory.AddRange(batchHistories);
+            _dbContext.SaveChanges();
 
             // Act
-            var result = await batchHistoryService.GetBatchHistories().ToListAsync();
+            var result = await _batchHistoryService.GetBatchHistorieAsync();
 
             // Assert
             //Test if GetBatchHistories return all Batch History(3)

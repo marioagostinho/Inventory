@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Enums;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
@@ -15,6 +17,7 @@ namespace Core.Models
         [Required(ErrorMessage = "ExpirationDate is required")]
         public DateTime ExpirationDate { get; set; }
         [Required(ErrorMessage = "IsDeleted is required")]
+        public EBatchState BatchState { get; set; }
         public bool IsDeleted { get; set; }
 
         public Batch(int? productId, int quantity, DateTime expirationDate, bool isDeleted)
@@ -22,6 +25,7 @@ namespace Core.Models
             ProductId = productId;
             Quantity = quantity;
             ExpirationDate = expirationDate;
+            BatchState = SetBatchState();
             IsDeleted = isDeleted;
         }
 
@@ -31,7 +35,18 @@ namespace Core.Models
             ProductId = productId;
             Quantity = quantity;
             ExpirationDate = expirationDate;
+            BatchState = SetBatchState();
             IsDeleted = isDeleted;
+        }
+
+        private EBatchState SetBatchState()
+        {
+            DateTime Now = DateTime.Today.Date;
+            TimeSpan DaysDifference = ExpirationDate.Date - Now;
+            int StateValue = Math.Sign(DaysDifference.Days);
+
+            return (EBatchState)StateValue;
+
         }
     }
 }

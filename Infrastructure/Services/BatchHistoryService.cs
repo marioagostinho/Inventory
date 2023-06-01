@@ -14,17 +14,26 @@ namespace Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public IQueryable<BatchHistory> GetBatchHistories()
+        public async Task<IQueryable<BatchHistory>> GetBatchHistorieAsync()
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
+                {
+                    //Ensure that is created cause is InMemory
+                    context.Database.EnsureCreated();
 
-                return context.BatchesHistory
-                    .OrderByDescending(b => b.Id)
-                    .Include(b => b.Batch)
-                    .Include(b => b.Batch.Product);
+                    //Get List of BatchHistory
+                    //Includes it's Batch
+                    var batchHistories = await context.BatchesHistory
+                        .OrderByDescending(b => b.Id)
+                        .Include(b => b.Batch)
+                        .ToListAsync();
+
+                    //Convert batchHistories to IQueryable
+                    return batchHistories.AsQueryable();
+                }
             }
             catch (Exception ex)
             {

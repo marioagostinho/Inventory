@@ -38,17 +38,10 @@ namespace Tests.Infrastructure
             batchService = new BatchService(new DbContextFactoryMock(dbContext));
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            // Clear the database after each test
-            dbContext.Database.EnsureDeleted();
-        }
-
         #region GetBatches
 
         [Test]
-        public void GetBatches_Returns_NonDeleted_Batches_With_Positive_Quantity()
+        public async Task GetBatches_Returns_NonDeleted_Batches_With_Positive_QuantityAsync()
         {
             // Arrange
             var product = new Product("Product", false);
@@ -66,7 +59,7 @@ namespace Tests.Infrastructure
             dbContext.SaveChanges();
 
             // Act
-            var result = batchService.GetBatches();
+            var result = await batchService.GetBatchesAsync();
 
             // Assert
             // Test if GetBatches() only returns the Batches that aren't deleted

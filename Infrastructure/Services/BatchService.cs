@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Infrastructure.Services
 {
@@ -16,21 +17,37 @@ namespace Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public IQueryable<Batch> GetBatches()
+        public async Task<IQueryable<Batch>> GetBatchesAsync()
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
+                {
+                    //Ensure that is created cause is InMemory
+                    await context.Database.EnsureCreatedAsync();
 
-                return context.Batches
-                    .Where(b => !b.IsDeleted && b.Quantity > 0)
-                    .OrderByDescending(b => b.Id)
-                    .Include(b => b.Product);
+                    //Get list of Batches
+                    //That aren't deleted and have a quantity bigger than 0
+                    //Includes it's Product
+                    var batches = await context.Batches
+                        .Where(b => !b.IsDeleted && b.Quantity > 0)
+                        .OrderByDescending(b => b.Id)
+                        .Include(b => b.Product)
+                        .ToListAsync();
+
+                    if(batches == null)
+                    {
+                        throw new Exception("Error in GetBatchesAsync: batches was null");
+                    }
+
+                    //Convert batches to IQueryable
+                    return batches.AsQueryable();
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error in GetBatches: {ex.Message}");
+                throw new Exception(ex.Message);
             }
         }
 
