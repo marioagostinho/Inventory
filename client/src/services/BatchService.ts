@@ -54,6 +54,7 @@ export default class BatchService {
 
     async AddOrUpdateBatch(newBatch: any, newBatchHistory: any) {
         console.log(newBatch);
+        console.log(newBatchHistory);
         try {
             const { data } = await this.client.mutate({
                 mutation: ADD_UPDATE_BATCH_MUTATION,

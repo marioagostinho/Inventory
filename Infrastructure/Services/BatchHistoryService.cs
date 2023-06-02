@@ -29,6 +29,7 @@ namespace Infrastructure.Services
                     var batchHistories = await context.BatchesHistory
                         .OrderByDescending(b => b.Id)
                         .Include(b => b.Batch)
+                        .Include(b => b.Batch.Product)
                         .ToListAsync();
 
                     //Convert batchHistories to IQueryable

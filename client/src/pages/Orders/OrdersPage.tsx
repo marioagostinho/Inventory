@@ -46,6 +46,7 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
         this.batchHistoryService
             .GetBatchHistoriesByType(type as "string")
             .then((data) => {
+                console.log(data);
                 if (data && data.batchHistories) {
                     const items = data.batchHistories
                         .map((item: any) => ({

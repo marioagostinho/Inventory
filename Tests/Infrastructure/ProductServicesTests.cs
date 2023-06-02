@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Infrastructure
@@ -13,6 +14,7 @@ namespace Tests.Infrastructure
     {
         private IProductService _productService;
         private InventoryDbContext _dbContext;
+        private InventoryDbContext _dbContextAlwaysOpen;
 
         [SetUp]
         public void SetUp()
@@ -29,6 +31,7 @@ namespace Tests.Infrastructure
                 .Options;
 
             _dbContext = new InventoryDbContext(options);
+            _dbContextAlwaysOpen = new InventoryDbContext(options);
             _productService = new ProductService(new DbContextFactoryMock(_dbContext));
         }
 
@@ -126,9 +129,9 @@ namespace Tests.Infrastructure
             var batch1 = new Batch(productId, 10, DateTime.Now, false);
             var batch2 = new Batch(productId, 5, DateTime.Now, false);
 
-            _dbContext.Products.Add(product);
-            _dbContext.Batches.AddRange(batch1, batch2);
-            _dbContext.SaveChanges();
+            await _dbContext.Products.AddAsync(product);
+            await _dbContext.Batches.AddRangeAsync(batch1, batch2);
+            _dbContext.SaveChangesAsync();
 
             // Act
             var result = await _productService.DeleteProductAsync(productId);
@@ -138,15 +141,15 @@ namespace Tests.Infrastructure
             Assert.IsTrue(result);
 
             // Test if the deleted product how has the IsDeleted equal true
-            var deletedProduct = _dbContext.Products.Find(productId);
+            var deletedProduct = _dbContextAlwaysOpen.Products.Find(productId);
             Assert.That(deletedProduct.IsDeleted, Is.True);
 
             // Test if DeleteProductAsync() deleted all it's batches
-            var deletedBatches = _dbContext.Batches.Where(b => b.ProductId == productId).ToList();
+            var deletedBatches = _dbContextAlwaysOpen.Batches.Where(b => b.ProductId == productId).ToList();
             Assert.IsTrue(deletedBatches.All(b => b.IsDeleted));
 
             // Test if DeleteProductAsync() created an history for the deleted batches
-            var batchHistories = _dbContext.BatchesHistory.ToList();
+            var batchHistories = _dbContextAlwaysOpen.BatchesHistory.ToList();
             Assert.That(batchHistories.Count, Is.EqualTo(2));
         }
     }

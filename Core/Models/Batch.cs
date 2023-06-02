@@ -1,6 +1,6 @@
 ﻿using Core.Enums;
+using HotChocolate;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
@@ -16,9 +16,28 @@ namespace Core.Models
         public int Quantity { get; set; }
         [Required(ErrorMessage = "ExpirationDate is required")]
         public DateTime ExpirationDate { get; set; }
-        [Required(ErrorMessage = "IsDeleted is required")]
-        public EBatchState BatchState { get; set; }
+        public EBatchState? BatchState { get; set; }
+        [GraphQLIgnore]
         public bool IsDeleted { get; set; }
+
+        public Batch(int? productId, int quantity, DateTime expirationDate)
+        {
+            ProductId = productId;
+            Quantity = quantity;
+            ExpirationDate = expirationDate;
+            BatchState = SetBatchState();
+            IsDeleted = false;
+        }
+
+        public Batch(int? id, int? productId, int quantity, DateTime expirationDate)
+        {
+            Id = id;
+            ProductId = productId;
+            Quantity = quantity;
+            ExpirationDate = expirationDate;
+            BatchState = SetBatchState();
+            IsDeleted = false;
+        }
 
         public Batch(int? productId, int quantity, DateTime expirationDate, bool isDeleted)
         {

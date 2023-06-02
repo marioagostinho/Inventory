@@ -10,13 +10,19 @@ namespace Core.Models
         [StringLength(50, ErrorMessage = "Name must not exceed 50 characters")]
         [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Name must have at least 1 non-whitespace character")]
         public string Name { get; set; }
-        [Required(ErrorMessage = "IsDeleted is required")]
         public bool IsDeleted { get; set; }
 
-        public Product(string name, bool isDeleted)
+        public Product(string name)
         {
             Name = name;
-            IsDeleted = isDeleted;
+            IsDeleted = false;
+        }
+
+        public Product(int? id, string name)
+        {
+            Id = id;
+            Name = name;
+            IsDeleted = false;
         }
 
         public Product(int? id, string name, bool isDeleted)
@@ -25,5 +31,12 @@ namespace Core.Models
             Name = name;
             IsDeleted = isDeleted;
         }
+
+        public Product(string name, bool isDeleted)
+        {
+            Name = name;
+            IsDeleted = isDeleted;
+        }
+
     }
 }

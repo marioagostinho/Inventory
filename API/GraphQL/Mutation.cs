@@ -11,6 +11,7 @@ namespace API.GraphQL
         {
             try
             {
+                //Check if the product is valid by following it's requirements
                 var validProduct = ModelValidations.IsFollowingDataAnotations<Product>(product);
 
                 return await productService.AddOrUpdateProductAsync(validProduct);
@@ -27,6 +28,7 @@ namespace API.GraphQL
         {
             try
             {
+                //Check if batch and bachHistory are valid by following their requirements
                 var validBatch = ModelValidations.IsFollowingDataAnotations<Batch>(batch);
                 var validBatchHistory = ModelValidations.IsFollowingDataAnotations<BatchHistory>(batchHistory);
 
@@ -43,11 +45,13 @@ namespace API.GraphQL
         {
             try
             {
+                //If productId equal or minor than 0 thow an exception
                 if(productId <= 0)
                 {
                     throw new Exception($"Error in AddBatchOrderOut: productId must be greater than 0");
                 }
 
+                //Check if batchHistory is valid by following its requirements
                 var validBatchHistory = ModelValidations.IsFollowingDataAnotations<BatchHistory>(batchHistory);
 
                 return await batchService.AddBatchOrderOutAsync(productId, validBatchHistory);
@@ -63,6 +67,7 @@ namespace API.GraphQL
         {
             try
             {
+                //If productId equal or minor than 0 thow an exception
                 if (productId <= 0)
                 {
                     throw new Exception($"Error in AddBatchOrderOut: productId must be greater than 0");
@@ -81,6 +86,7 @@ namespace API.GraphQL
         {
             try
             {
+                //If batchId equal or minor than 0 thow an exception
                 if (batchId <= 0)
                 {
                     throw new Exception($"Error in AddBatchOrderOut: productId must be greater than 0");

@@ -18,7 +18,8 @@ namespace Tests.Infrastructure
     public class BatchServiceTests
     {
         private IBatchService batchService;
-        private InventoryDbContext dbContext;
+        private InventoryDbContext _dbContext;
+        private InventoryDbContext _dbContextAlwaysOpen;
 
         [SetUp]
         public void SetUp()
@@ -34,8 +35,9 @@ namespace Tests.Infrastructure
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
-            dbContext = new InventoryDbContext(options);
-            batchService = new BatchService(new DbContextFactoryMock(dbContext));
+            _dbContext = new InventoryDbContext(options);
+            _dbContextAlwaysOpen = new InventoryDbContext(options);
+            batchService = new BatchService(new DbContextFactoryMock(_dbContext));
         }
 
         #region GetBatches
@@ -45,7 +47,7 @@ namespace Tests.Infrastructure
         {
             // Arrange
             var product = new Product("Product", false);
-            dbContext.Products.Add(product);
+            _dbContext.Products.Add(product);
 
             var batches = new List<Batch>
             {
@@ -54,9 +56,9 @@ namespace Tests.Infrastructure
                 new Batch(product.Id, -5, DateTime.Now.AddDays(30), false ), // Negative quantity
                 new Batch(product.Id, 15, DateTime.Now.AddDays(30), true ), // Deleted batch
             };
-            dbContext.Batches.AddRange(batches);
+            _dbContext.Batches.AddRange(batches);
 
-            dbContext.SaveChanges();
+            _dbContext.SaveChanges();
 
             // Act
             var result = await batchService.GetBatchesAsync();
@@ -81,8 +83,8 @@ namespace Tests.Infrastructure
         {
             // Arrange
             var product = new Product("Product", false);
-            dbContext.Products.Add(product);
-            dbContext.SaveChanges();
+            _dbContext.Products.Add(product);
+            _dbContext.SaveChanges();
 
             var batch = new Batch(product.Id, 10, DateTime.Now.AddDays(30), false);
             var batchHistory = new BatchHistory(0,10, DateTime.Now, EHistoryType.OrderIn, "New batch added");
@@ -98,7 +100,7 @@ namespace Tests.Infrastructure
             Assert.That(result.IsDeleted, Is.EqualTo(batch.IsDeleted));
             Assert.IsFalse(result.IsDeleted);
 
-            var batchHistories = dbContext.BatchesHistory.ToList();
+            var batchHistories = _dbContextAlwaysOpen.BatchesHistory.ToList();
             Assert.That(batchHistories.Count, Is.EqualTo(1));
             Assert.That(batchHistories.First().BatchId, Is.EqualTo(result.Id));
         }
@@ -108,13 +110,13 @@ namespace Tests.Infrastructure
         {
             // Arrange
             var product = new Product("Product", false);
-            dbContext.Products.Add(product);
-            dbContext.SaveChanges();
+            _dbContext.Products.Add(product);
+            _dbContext.SaveChanges();
 
             var existingBatch = new Batch(product.Id, 10, DateTime.Now.AddDays(30),  false);
 
-            dbContext.Batches.Add(existingBatch);
-            dbContext.SaveChanges();
+            _dbContext.Batches.Add(existingBatch);
+            _dbContext.SaveChanges();
 
             var updatedBatch = new Batch(existingBatch.Id, product.Id, 20, DateTime.Now.AddDays(60), false);
 
@@ -131,7 +133,7 @@ namespace Tests.Infrastructure
             Assert.That(result.IsDeleted, Is.EqualTo(updatedBatch.IsDeleted));
             Assert.IsFalse(result.IsDeleted);
 
-            var batchHistories = dbContext.BatchesHistory.ToList();
+            var batchHistories = _dbContextAlwaysOpen.BatchesHistory.ToList();
             Assert.That(batchHistories.Count, Is.EqualTo(1));
             Assert.That(batchHistories.First().BatchId, Is.EqualTo(result.Id));
         }
@@ -145,8 +147,8 @@ namespace Tests.Infrastructure
         {
             // Arrange
             var product = new Product("Product", false);
-            dbContext.Products.Add(product);
-            dbContext.SaveChanges();
+            _dbContext.Products.Add(product);
+            _dbContext.SaveChanges();
 
             var batches = new List<Batch>
             {
@@ -155,8 +157,8 @@ namespace Tests.Infrastructure
                 new Batch(product.Id, 20, DateTime.Now.AddDays(90), false)
             };
 
-            dbContext.Batches.AddRange(batches);
-            dbContext.SaveChanges();
+            _dbContext.Batches.AddRange(batches);
+            _dbContext.SaveChanges();
 
             var batchHistory = new BatchHistory(1, 35, DateTime.Now, EHistoryType.OrderOut, "Order out");
 
@@ -166,12 +168,12 @@ namespace Tests.Infrastructure
             // Assert
             Assert.IsTrue(result);
 
-            var updatedBatches = dbContext.Batches.ToList();
+            var updatedBatches = _dbContextAlwaysOpen.Batches.ToList();
             Assert.That(updatedBatches.Count, Is.EqualTo(3));
             Assert.That(updatedBatches.Sum(b => b.Quantity), Is.EqualTo(0));
             Assert.IsTrue(updatedBatches.All(b => b.IsDeleted));
 
-            var batchHistories = dbContext.BatchesHistory.ToList();
+            var batchHistories = _dbContextAlwaysOpen.BatchesHistory.ToList();
             Assert.That(batchHistories.Count, Is.EqualTo(3));
         }
 
@@ -180,8 +182,8 @@ namespace Tests.Infrastructure
         {
             // Arrange
             var product = new Product("Product", false);
-            dbContext.Products.Add(product);
-            dbContext.SaveChanges();
+            _dbContext.Products.Add(product);
+            _dbContext.SaveChanges();
 
             var batches = new List<Batch>
             {
@@ -189,8 +191,8 @@ namespace Tests.Infrastructure
                 new Batch(product.Id, 5, DateTime.Now.AddDays(60), false )
             };
 
-            dbContext.Batches.AddRange(batches);
-            dbContext.SaveChanges();
+            _dbContext.Batches.AddRange(batches);
+            _dbContext.SaveChanges();
 
             var batchHistory = new BatchHistory(1, 25, DateTime.Now, EHistoryType.OrderOut, "Order out");
 
@@ -200,12 +202,12 @@ namespace Tests.Infrastructure
             // Assert
             Assert.IsFalse(result);
 
-            var updatedBatches = dbContext.Batches.ToList();
+            var updatedBatches = _dbContextAlwaysOpen.Batches.ToList();
             Assert.That(updatedBatches.Count, Is.EqualTo(2));
             Assert.That(updatedBatches.Sum(b => b.Quantity), Is.EqualTo(15));
             Assert.IsFalse(updatedBatches.All(b => b.IsDeleted));
 
-            var batchHistories = dbContext.BatchesHistory.ToList();
+            var batchHistories = _dbContextAlwaysOpen.BatchesHistory.ToList();
             Assert.That(batchHistories.Count, Is.EqualTo(0));
         }
 
@@ -219,8 +221,8 @@ namespace Tests.Infrastructure
             // Arrange
             var batch = new Batch(1, 10, DateTime.Now.AddDays(30), false);
 
-            dbContext.Batches.Add(batch);
-            dbContext.SaveChanges();
+            _dbContext.Batches.Add(batch);
+            _dbContext.SaveChanges();
 
             // Act
             var result = await batchService.DeleteBatchAsync((int)batch.Id);
@@ -228,10 +230,10 @@ namespace Tests.Infrastructure
             // Assert
             Assert.IsTrue(result);
 
-            var updatedBatch = await dbContext.Batches.FindAsync(batch.Id);
+            var updatedBatch = await _dbContextAlwaysOpen.Batches.FindAsync(batch.Id);
             Assert.That(updatedBatch.IsDeleted, Is.True);
 
-            var batchHistory = dbContext.BatchesHistory.FirstOrDefault();
+            var batchHistory = _dbContextAlwaysOpen.BatchesHistory.FirstOrDefault();
             Assert.IsNotNull(batchHistory);
             Assert.That(batchHistory.BatchId, Is.EqualTo(batch.Id));
             Assert.That(batchHistory.Quantity, Is.EqualTo(-batch.Quantity));

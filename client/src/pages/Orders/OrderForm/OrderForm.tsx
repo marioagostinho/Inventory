@@ -102,6 +102,9 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
 
     private AddOrUpdateBatchById = (batch: BatchFormInfo, batchHistory: BatchHistoryFormInfo) => {
 
+        console.log(batch);
+        console.log(batchHistory);
+
         batchHistory.quantity = batch.quantity;
         batchHistory.date = new Date();
 
@@ -115,6 +118,9 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     };
 
     private AddBatchOrderOut = (productId: number, batchHistory: BatchHistoryFormInfo) => {
+
+        console.log(productId);
+        console.log(batchHistory);
 
         batchHistory.quantity = this.batchForm.quantity;
         batchHistory.date = new Date();
