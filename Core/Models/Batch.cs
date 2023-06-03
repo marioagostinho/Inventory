@@ -48,6 +48,7 @@ namespace Core.Models
             IsDeleted = isDeleted;
         }
 
+        //TestUnit Constructor
         public Batch(int? id, int? productId, int quantity, DateTime expirationDate, bool isDeleted)
         {
             Id = id;

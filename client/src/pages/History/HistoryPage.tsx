@@ -13,6 +13,7 @@ interface State {
 class HistoryPage extends Component<{}, State> {
     private batchHistoryService: BatchHistoryService;
 
+    //CONTRUCTOR
     constructor(props: any) {
         super(props);
 
@@ -24,10 +25,14 @@ class HistoryPage extends Component<{}, State> {
         this.batchHistoryService = new BatchHistoryService();
     }
 
+    //AFTER THE COMPONENT IS LOAD
     componentDidMount() {
         this.fetchBatchHistories();
     }
 
+    //SERVICES
+
+    //Fecth all the batchHistories
     fetchBatchHistories = () => {
         this.batchHistoryService
             .GetBatchHistories()
@@ -44,6 +49,7 @@ class HistoryPage extends Component<{}, State> {
                         }
                     } as ItemListInfo));
 
+                    //Update items array and isItemListLoading state
                     this.setState({ 
                         items,
                         isItemListLoading: false
@@ -52,16 +58,11 @@ class HistoryPage extends Component<{}, State> {
             })
             .catch((error) => {
                 console.error(error);
-
-                this.setState({
-                    isItemListLoading: false
-                });
             });
     };
 
-
     render() {
-         //TABLE INFORMATION
+         //Set batch histories list header
          const Header: ItemListHeader[] = [
             { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} } },
             { Title: "Product", Value: "product"},
@@ -91,17 +92,18 @@ class HistoryPage extends Component<{}, State> {
                 Props: {style:{overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis', maxWidth:'350px'}}
             }
         ];
-        const { items } = this.state;
 
         return (
         <div>
+            {/* Page Title */}
             <ContentTitle Title={"History"} />
 
+            {/* Batch Histories list */}
             <ItemList
-            Header={Header}
-            Items={items}
-            NoItemsWarning='No history available' 
-            IsLoading={this.state.isItemListLoading}/>
+                Header={Header}
+                Items={this.state.items}
+                NoItemsWarning='No history available' 
+                IsLoading={this.state.isItemListLoading}/>
         </div>
         );
     }

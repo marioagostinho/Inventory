@@ -10,6 +10,7 @@ query GetBatches {
         }
         quantity
         expirationDate
+        batchState
     }
 }
 `;
@@ -25,6 +26,7 @@ query GetBatches($id: Int) {
     }
     quantity
     expirationDate
+    batchState
   }
 }
 `;

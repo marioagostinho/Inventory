@@ -134,7 +134,7 @@ namespace Infrastructure.Services
                     //Get all the existing batches for the required product
                     //Check if isn't expired, quantity is bigger than 0 and isn't deleted
                     var batchList = await context.Batches
-                        .Where(b => b.ProductId == productId && b.ExpirationDate > DateTime.Now && b.Quantity > 0 && b.IsDeleted == false)
+                        .Where(b => b.ProductId == productId && b.ExpirationDate >= DateTime.Now && b.Quantity > 0 && b.IsDeleted == false)
                         .ToListAsync();
 
                     //If the sum of all existing product batches are smaller that the required quantity return false

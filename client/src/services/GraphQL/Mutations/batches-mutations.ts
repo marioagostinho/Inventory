@@ -7,7 +7,6 @@ export const ADD_UPDATE_BATCH_MUTATION = gql`
           productId
           quantity
           expirationDate
-          isDeleted
     }
   }
 `;

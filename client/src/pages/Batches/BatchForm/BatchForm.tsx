@@ -7,7 +7,6 @@ import moment from 'moment';
 
 import ProductService from '../../../services/ProductService';
 import BatchService from '../../../services/BatchService';
-import BatchHistoryService from '../../../services/BatchHistoryService';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
 import NotFound from '../../NotFound/NotFoundPage';
@@ -18,7 +17,6 @@ interface BatchFormInfo {
     productId: number;
     quantity: number;
     expirationDate: Date;
-    isDeleted: boolean;
 }
 
 interface BatchHistoryFormInfo {
@@ -41,54 +39,50 @@ interface BatchFormProps {
     handleNavigation: () => void;
 }
 
+//Component
 class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
     private productService: ProductService;
     private BatchService: BatchService;
-    private batchHistoryService: BatchHistoryService
-
-    private batchForm: BatchFormInfo;
-    private batchHistoryForm: BatchHistoryFormInfo;
 
     private OriginalQuantity: number;
     
+    //CONSTRUCTOR
     constructor(props: BatchFormProps) {
         super(props);
 
         this.OriginalQuantity = 0;
 
-        this.batchForm = {
-            id: props.id,
-            productId: 0,
-            quantity: 0,
-            expirationDate: new Date() || null,
-            isDeleted: false
-        };
-
-        this.batchHistoryForm = {
-            id: 0,
-            batchId: 0,
-            quantity: 0,
-            date: new Date() || null,
-            type: 'DEFECT',
-            comment: ''
-        };
-
         this.state = {
             products: [],
-            batchForm: this.batchForm,
-            batchHistoryForm: this.batchHistoryForm
+            batchForm: {
+                id: props.id,
+                productId: 0,
+                quantity: 0,
+                expirationDate: new Date() || null
+            },
+            batchHistoryForm: {
+                id: 0,
+                batchId: props.id,
+                quantity: 0,
+                date: new Date() || null,
+                type: 'DEFECT',
+                comment: ''
+            }
         };
 
         this.productService = new ProductService();
         this.BatchService = new BatchService();
-        this.batchHistoryService = new BatchHistoryService();  
     }
 
+    //AFTER THE COMPONENT IS LOAD
     componentDidMount() {
         this.fetchProducts();
         this.fetchBatchById(this.props.id);
     }
 
+    //SERVICES
+
+    //Fecth all the products
     private fetchProducts = () => {
         this.productService.GetProducts()
             .then((data) => {
@@ -103,23 +97,22 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             });
     };
 
+    //Fetch batch by Id
     private fetchBatchById = (id: number) => {
         this.BatchService.GetBatchById(id)
             .then((data) => {
                 if(data && data.batches) {
                     this.OriginalQuantity = data.batches[0].quantity;
 
-                    this.batchForm = {
-                        id: this.props.id,
-                        productId: data.batches[0].product.id,
-                        quantity: data.batches[0].quantity,
-                        expirationDate: moment(data.batches[0].expirationDate).toDate(),
-                        isDeleted: false
-                    }
-
+                    //Set batchForm state
                     this.setState({
-                        batchForm: this.batchForm
-                    })
+                        batchForm: {
+                            id: this.props.id,
+                            productId: data.batches[0].product.id,
+                            quantity: data.batches[0].quantity,
+                            expirationDate: moment(data.batches[0].expirationDate).toDate()
+                        }
+                    });
                 }
             })
             .catch((error) => {
@@ -127,6 +120,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             });
     };
 
+    //Add or Update batch by Id
     private AddOrUpdateBatchById = (batch: BatchFormInfo, batchHistory: BatchHistoryFormInfo) => {
         batchHistory.quantity = batch.quantity - this.OriginalQuantity;
         batchHistory.date = new Date();
@@ -140,47 +134,59 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             });
     };
 
+    //Change Form state when field product changes
     handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        this.batchForm.productId = parseInt(event.target.value);
+        const newBatchForm : BatchFormInfo = this.state.batchForm;
+        newBatchForm.productId = parseInt(event.target.value);
+
         this.setState({
-            batchForm: this.batchForm
+            batchForm: newBatchForm
         });
     };
 
+    //Change Form state when field quantity changes
     handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const numericInput = event.target.value.replace(/[^0-9]/g, '');
-        this.batchForm.quantity = parseInt(numericInput);
 
-        if(isNaN(this.batchForm.quantity)) {
-            this.batchForm.quantity = 0;
+        const newBatchForm : BatchFormInfo = this.state.batchForm;
+        newBatchForm.quantity = parseInt(numericInput);
+
+        if(isNaN(newBatchForm.quantity)) {
+            newBatchForm.quantity = 0;
         }
 
         this.setState({
-            batchForm: this.batchForm
+            batchForm: newBatchForm
         });
     };
 
+    //Change Form state when field reason changes
     handleReasonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        this.batchHistoryForm.type = event.target.value;
+        const newBatchHistoryForm: BatchHistoryFormInfo = this.state.batchHistoryForm;
+        newBatchHistoryForm.type = event.target.value;
 
         this.setState({
-            batchHistoryForm: this.batchHistoryForm
+            batchHistoryForm: newBatchHistoryForm
         });
     };
 
+    //Change Form state when field date changes
     handleDateChange = (date: Date) => {
-        this.batchForm.expirationDate = date;
+        const newBatchForm : BatchFormInfo = this.state.batchForm;
+        newBatchForm.expirationDate = date;
 
         this.setState({
-            batchForm: this.batchForm
+            batchForm: newBatchForm
         });
     };
 
+    //Change Form state when field cooment changes
     handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.batchHistoryForm.comment = event.target.value;
+        const newBatchHistoryForm: BatchHistoryFormInfo = this.state.batchHistoryForm;
+        newBatchHistoryForm.comment = event.target.value;
 
         this.setState({
-            batchHistoryForm: this.batchHistoryForm
+            batchHistoryForm: newBatchHistoryForm
         });
     };
 
@@ -188,9 +194,11 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
         
         return (
             <div className="batch-content">
+                {/* Page Title */}
                 <ContentTitle
                     Title={`Edit Batch #${this.props.id}`} />
                 
+                {/* Form */}
                 <Form>
                     <Card>
                         <Card.Body>
@@ -200,7 +208,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                                 <Form.Select
                                     disabled
                                     onChange={this.handleProductChange}
-                                    value={this.batchForm.productId}>
+                                    value={this.state.batchForm.productId}>
                                     <option key='0' value='' disabled>Choose product...</option>
                                     {
                                         this.state.products.map((product: any) => {
@@ -217,13 +225,13 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                                 <Form.Control 
                                     placeholder="Ex: 100"
                                     onChange={this.handleQuantityChange}
-                                    value={this.batchForm.quantity}/>
+                                    value={this.state.batchForm.quantity}/>
                             </Form.Group>
 
                             <Form.Group as={Col} controlId="formGridZip">
                                 <Form.Label>Expiration Date</Form.Label>
                                 <DatePicker
-                                    selected={this.batchForm.expirationDate}
+                                    selected={this.state.batchForm.expirationDate}
                                     onChange={this.handleDateChange}
                                     dateFormat="dd/MM/yyyy"
                                     placeholderText="Ex: 31/02/2012"
@@ -236,7 +244,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                                 <Form.Label>Reason</Form.Label>
                                 <Form.Select 
                                     onChange={this.handleReasonChange}
-                                    value={this.batchHistoryForm.type}>
+                                    value={this.state.batchHistoryForm.type}>
                                     <option key="DEFECT" value="DEFECT">Defect</option>
                                     <option key="LOST" value="LOST">Lost</option>
                                     <option key="OTHER" value="OTHER">Other</option>
@@ -251,7 +259,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                                     as="textarea"
                                     style={{ height: '200px' }}
                                     onChange={this.handleCommentChange}
-                                    value={this.batchHistoryForm.comment} />
+                                    value={this.state.batchHistoryForm.comment} />
                             </Form.Group>
                         </Row>
 
@@ -265,7 +273,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                                 <Button 
                                     variant="success"
                                     type="button"
-                                    onClick={() => this.AddOrUpdateBatchById(this.batchForm, this.batchHistoryForm)}>
+                                    onClick={() => this.AddOrUpdateBatchById(this.state.batchForm, this.state.batchHistoryForm)}>
                                     Confirm
                                 </Button>
                             </div>
@@ -277,15 +285,19 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
     }
 }
 
+//Function
 function BatchForm() {
+    //Hooks
     const params = useParams<{ batchId?: string }>();
     const batchId = parseInt(params.batchId || '0');
     const navigate = useNavigate();
 
+    //Redirect to /batches
     const handleNavigation = () => {
         navigate('/batches');
     }
 
+    //If batch id isn't a number or is smaller than zero return NotFound page
     if(batchId === 0 || isNaN(Number(batchId)))
     {
         return <NotFound />

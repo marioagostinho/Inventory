@@ -50,7 +50,10 @@ svg {
   font-size: 20px;
 }
 
-
+.Centered-Container{
+  margin-top: 40vh;
+  text-align: center;
+}
 
 @media only screen and (min-width: 1200px) {
   .app-centralized-content {

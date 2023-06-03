@@ -11,7 +11,6 @@ import NotFound from '../../NotFound/NotFoundPage';
 interface ProductFormItem {
     id: number;
     name: string;
-    isDeleted: boolean;
 }
 
 interface ProductFormProps {
@@ -23,46 +22,44 @@ interface ProductFormState {
     form: ProductFormItem;
 }
 
+//Component
 class ProductsPageComponent extends Component<ProductFormProps, ProductFormState> {
     private productService: ProductService;
-    private form: ProductFormItem;
-
-    private formTitle: string;
-    private actionTitle: string;
     
+    //CONSTRUCTOR
     constructor(props: ProductFormProps) {
         super(props);
-
-        this.formTitle = (props.id > 0) ? 'Edit Product' : 'New Product';
-        this.actionTitle = (props.id > 0) ? 'Confirm' : 'Add';
-
-        this.form = {
-            id: props.id,
-            name: '',
-            isDeleted: false
-        }
+    
+        this.state ={
+            form: {
+                id: props.id,
+                name: ''
+            }
+        };
 
         this.productService = new ProductService();
     }
 
+    //AFTER THE COMPONENT IS LOAD
     componentDidMount() {
         if(this.props.id > 0) {
             this.fetchProductById(this.props.id);
         }
     }
 
+    //SERVICES
+
+    //Fecth product by Id
     private fetchProductById = (id: number) => {
         this.productService.GetProductById(id)
             .then((data) => {
                 if(data && data.products) {
-                    this.form = {
-                        id:  data.products[0].id,
-                        name: data.products[0].name,
-                        isDeleted: data.products[0].isDeleted || false
-                    }
-
+                    //Set form state
                     this.setState({
-                        form: this.form
+                        form: {
+                            id:  data.products[0].id,
+                            name: data.products[0].name
+                        }
                     });
                 }
             })
@@ -71,32 +68,42 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
             });
     };
 
+    //Add or Update product by Id
     private AddOrUpdateProductById = (product: any) => {
-       this.productService.AddOrUpdateProduct(product)
-            .then((data) => {
-                this.props.handleNavigation();
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+        this.productService.AddOrUpdateProduct(product)
+                .then((data) => {
+                    //Redirect to /Products
+                    this.props.handleNavigation();
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
     };
     
+    //ACTIONS
 
+    //Change Form state when field name changes
     handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.form.name = event.target.value;
+        const newForm: ProductFormItem = this.state.form;
+        newForm.name = event.target.value;
 
         this.setState({
-            form: this.form
+            form: newForm
         });
     };
 
     render() {
 
+        const formTitle: string = (this.props.id > 0) ? 'Edit Product' : 'New Product';
+        const actionTitle: string = (this.props.id > 0) ? 'Confirm' : 'Add';
+
         return (
             <div>
+                {/* Page Title */}
                 <ContentTitle
-                    Title={this.formTitle} />
+                    Title={formTitle} />
 
+                {/* Form */}
                 <Card>
                     <Form>
                         <Card.Body>
@@ -106,7 +113,7 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
                                     <Form.Control 
                                         placeholder="Ex: Pasta" 
                                         onChange={this.handleNameChange}
-                                        value={this.form.name} />
+                                        value={this.state.form.name} />
                                 </Form.Group>
                             </Row>  
                         </Card.Body>
@@ -115,8 +122,8 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
                                 <Button variant="danger" type="button" href="/Products">
                                     Cancel
                                 </Button>
-                                <Button variant="success" type="button" onClick={() => this.AddOrUpdateProductById(this.form)}>
-                                    {this.actionTitle}
+                                <Button variant="success" type="button" onClick={() => this.AddOrUpdateProductById(this.state.form)}>
+                                    {actionTitle}
                                 </Button>
                             </div>
                         </Card.Footer>
@@ -127,15 +134,19 @@ class ProductsPageComponent extends Component<ProductFormProps, ProductFormState
     }
 }
 
+//Function
 function ProductsForm() {
+    //Hooks
     const params = useParams<{ productId?: string }>();
     const productId = parseInt(params.productId || '0');
     const navigate = useNavigate();
 
+    //Redirect to /products
     const handleNavigation = () => {
         navigate('/products');
     }
 
+    //If product id isn't a number or is smaller than zero return NotFound page
     if(productId < 0 || isNaN(Number(productId))) {
         return <NotFound />
     }

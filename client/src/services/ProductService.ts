@@ -22,7 +22,7 @@ export default class ProductService {
         });
     }
 
-    //GET ALL PRODUCTS 
+    //Get all products that aren't deleted 
     async GetProducts() {
         try {
             const { data } = await this.client.query({
@@ -37,6 +37,7 @@ export default class ProductService {
         }
     }
 
+    //Get product by Id
     async GetProductById(id: number) {
         try {
             const { data } = await this.client.query({
@@ -52,6 +53,7 @@ export default class ProductService {
         }
     }
 
+    //Add or update product, if product id equal 0 then add, otherwise update
     async AddOrUpdateProduct(newProduct: any) {
         try {
             const { data } = await this.client.mutate({
@@ -69,8 +71,8 @@ export default class ProductService {
         }
     }
 
+    //Delete product by Id
     async DeleteProductById(productId: number) {
-        console.log(productId);
         try {
             const { data } = await this.client.mutate({
                 mutation: DELETE_PRODUCT_BY_ID_MUTATION,
@@ -80,7 +82,7 @@ export default class ProductService {
             return data;
         } catch (error) {
             console.error(error);
-            
+
             throw error;
         }
     }
