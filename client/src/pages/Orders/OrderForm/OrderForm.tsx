@@ -17,6 +17,7 @@ import InDatePicker from '../../../components/FormsUI/InDatePicker';
 //SERVICES
 import ProductService from '../../../services/ProductService';
 import BatchService from '../../../services/BatchService';
+import UniversalToast from '../../../components/UniversalToast/UniversalToast';
 
 interface OrderFormState {
     products: any[];
@@ -79,6 +80,9 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
 
         this.batchService.AddOrUpdateBatch(values.batchForm, values.batchHistoryForm)
              .then((data) => {
+                //Toast
+                UniversalToast.success("Order in was added successfully!");
+
                 this.props.handleNavigation();
              })
              .catch((error) => {
@@ -93,7 +97,14 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
         this.batchService.AddBatchOrderOut(values.batchForm.productId, values.batchHistoryForm)
              .then((data) => {
                 if(data.addBatchOrderOut) {
+                    //Toast
+                    UniversalToast.success("Order out was added successfully!");
+
                     this.props.handleNavigation();
+                } 
+                else {
+                    //Toast
+                    UniversalToast.error("Order out can't be done with that product or quantity!");
                 }
              })
              .catch((error) => {
@@ -105,6 +116,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
 
     //Selected AddOrUpdateBatchById or AddBatchOrderOut based on the type
     private HandleAddAction = (values:any) => {
+        values.batchForm.productId = parseInt(values.batchForm.productId);
         values.batchForm.quantity = parseInt(values.batchForm.quantity);
 
         if(values.batchHistoryForm.type === "ORDER_IN") {

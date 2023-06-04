@@ -8,6 +8,7 @@ import BatchService from '../../services/BatchService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import DeleteModal from '../../components/DeleteModal/DeleteModal';
+import UniversalToast from '../../components/UniversalToast/UniversalToast';
 
 interface BatchesComponentState {
     items: any[];
@@ -84,6 +85,9 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                     items: updatedItems,
                     isModalVisible: false
                 });
+
+                //Toast
+                UniversalToast.success("Batch was deleted successfully");
                 })
                 .catch((error) => {
                     console.error(error);

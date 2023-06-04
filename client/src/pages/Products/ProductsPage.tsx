@@ -8,6 +8,8 @@ import ItemList, { ItemListHeader, ItemListInfo } from '../../components/ItemLis
 import ProductService from '../../services/ProductService';
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
 import DeleteModal from '../../components/DeleteModal/DeleteModal';
+import { toast } from 'react-toastify';
+import UniversalToast from '../../components/UniversalToast/UniversalToast';
 
 interface ProductsComponentState {
     open: boolean;
@@ -87,6 +89,8 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
                     items: updatedItems,
                     isModalVisible: false
                 });
+
+                UniversalToast.success("Product was deleted successfully");
              })
              .catch((error) => {
                  console.error(error);
@@ -106,6 +110,11 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
 
     //Change delete modal visibility
     handleModalVisibility = (newVisibility: boolean) => {
+        if(newVisibility == true)
+        {
+            toast.dismiss();
+        }
+
         this.setState({
             isModalVisible: newVisibility
         });

@@ -91,7 +91,7 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
 
                     const colorStyle: string = (parseInt(item.Value[header.Value]) < 0) ? "red" : "green";
 
-                    return <td key={item.Value[header.Value]} style={{color: colorStyle, fontWeight: 'bold'}}>
+                    return <td key={item.Value[header.Value].toString() + "rw"} style={{color: colorStyle, fontWeight: 'bold'}}>
                         {item.Value[header.Value]}
                     </td>;
                 }

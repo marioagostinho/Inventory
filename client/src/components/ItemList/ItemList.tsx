@@ -43,7 +43,7 @@ export default function ItemList({MaxHeight = '800px', Header, Items, NoItemsWar
                 {
                     Items.length > 0 && IsLoading === false &&
                     Items.map((item, itemIndex) => (
-                        <tr key={item.Value.id}>
+                        <tr key={item.Value.id.toString}>
                             {
                                 Header.map((header, headerIndex) => {
                                     if (header.Render) {

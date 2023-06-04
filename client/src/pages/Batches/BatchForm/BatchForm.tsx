@@ -17,6 +17,7 @@ import InSubmitButton from '../../../components/FormsUI/InSubmitButton';
 
 //SERVICE
 import BatchService from '../../../services/BatchService';
+import UniversalToast from '../../../components/UniversalToast/UniversalToast';
 
 interface BatchFormState {
     products: any[];
@@ -84,6 +85,9 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
 
         this.BatchService.AddOrUpdateBatch(values.batchForm, values.batchHistoryForm)
             .then((data) => {
+                //Toast
+                UniversalToast.success("Batch was edited successfully");
+                
                 this.props.handleNavigation();
             })
             .catch((error) => {

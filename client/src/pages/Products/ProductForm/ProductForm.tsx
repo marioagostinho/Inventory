@@ -15,6 +15,7 @@ import InTextField from '../../../components/FormsUI/InTextField';
 
 //SERVICES
 import ProductService from '../../../services/ProductService';
+import UniversalToast from '../../../components/UniversalToast/UniversalToast';
 
 
 interface ProductFormProps {
@@ -65,6 +66,10 @@ class ProductsPageComponent extends Component<ProductFormProps> {
     private AddOrUpdateProductById = (product: any) => {
         this.productService.AddOrUpdateProduct(product)
                 .then((data) => {
+                    //Display toast
+                    const toastMessage = (this.props.id > 0) ? "Product was edit successfully!" : "Product was added successfully!";
+                    UniversalToast.success(toastMessage);
+
                     //Redirect to /Products
                     this.props.handleNavigation();
                 })
