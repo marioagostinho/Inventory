@@ -76,9 +76,6 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     //Add or Update batch by Id
     private AddOrUpdateBatchById = (values: any) => {
         values.batchHistoryForm.quantity = values.batchForm.quantity;
-        values.batchHistoryForm.date = new Date();
-
-        console.log(values);
 
         this.batchService.AddOrUpdateBatch(values.batchForm, values.batchHistoryForm)
              .then((data) => {
@@ -92,7 +89,6 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     //Add order out by Id
     private AddBatchOrderOut = (values: any) => {
         values.batchHistoryForm.quantity = values.batchForm.quantity;
-        values.date = new Date();
 
         this.batchService.AddBatchOrderOut(values.batchForm.productId, values.batchHistoryForm)
              .then((data) => {

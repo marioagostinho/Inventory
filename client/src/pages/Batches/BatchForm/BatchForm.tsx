@@ -15,8 +15,7 @@ import InTextField from '../../../components/FormsUI/InTextField';
 import InDatePicker from '../../../components/FormsUI/InDatePicker';
 import InSubmitButton from '../../../components/FormsUI/InSubmitButton';
 
-//SERVICES
-import ProductService from '../../../services/ProductService';
+//SERVICE
 import BatchService from '../../../services/BatchService';
 
 interface BatchFormState {
@@ -30,7 +29,6 @@ interface BatchFormProps {
 
 //Component
 class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
-    private productService: ProductService;
     private BatchService: BatchService;
 
     private OriginalQuantity: number;
@@ -48,7 +46,6 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             products: []
         };
 
-        this.productService = new ProductService();
         this.BatchService = new BatchService();
     }
 
@@ -84,7 +81,6 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
     private AddOrUpdateBatchById = (values: any) => {
         values.batchForm.quantity = parseInt(values.batchForm.quantity);
         values.batchHistoryForm.quantity = values.batchForm.quantity - this.OriginalQuantity;
-        values.batchHistoryForm.date = new Date();
 
         this.BatchService.AddOrUpdateBatch(values.batchForm, values.batchHistoryForm)
             .then((data) => {
