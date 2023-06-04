@@ -92,6 +92,8 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
     };
 
     render() {
+        let OriginalQuantity = this.OriginalQuantity;
+
         //Form values initialization
         const INITIAL_VALUES = {
             batchForm: {
@@ -113,12 +115,17 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
         //Form validation
         const FORM_VALIDATION = yup.object().shape({
             batchForm: yup.object().shape({
-              quantity: yup.number().required('Quantity is required').min(1, 'Quantity must be greater than 0'),
-              expirationDate: yup.date().required("Expiration Date is required")
+              quantity: yup.number()
+                .required('Quantity is required')
+                .min(1, 'Quantity must be greater than 0'),
+              expirationDate: yup.date()
+                .required("Expiration Date is required")
             }),
             batchHistoryForm: yup.object().shape({
-              type: yup.string().required('Type is required'),
-              comment: yup.string().max(250, 'Comment must not exceed 250 characters'),
+              type: yup.string()
+                .required('Type is required'),
+              comment: yup.string()
+                .max(250, 'Comment must not exceed 250 characters'),
             }),
         });
         
@@ -127,7 +134,7 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
                 {/* Page Title */}
                 <ContentTitle
                     Title={`Edit Batch #${this.props.id}`} />
-                
+
                 {/* Form */}
                 <Card>
                     <Formik

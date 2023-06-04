@@ -1,6 +1,7 @@
 ﻿using Core.Enums;
 using HotChocolate;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
@@ -16,6 +17,7 @@ namespace Core.Models
         public int Quantity { get; set; }
         [Required(ErrorMessage = "ExpirationDate is required")]
         public DateTime ExpirationDate { get; set; }
+        [NotMapped]
         public EBatchState? BatchState { get; set; }
         [GraphQLIgnore]
         public bool IsDeleted { get; set; }
@@ -39,6 +41,7 @@ namespace Core.Models
             IsDeleted = false;
         }
 
+        //TestUnit Constructor
         public Batch(int? productId, int quantity, DateTime expirationDate, bool isDeleted)
         {
             ProductId = productId;

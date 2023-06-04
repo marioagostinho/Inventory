@@ -96,16 +96,20 @@ namespace Infrastructure.Services
                         context.Batches.Update(NewBatch);
                     }
 
-                    //Create a BatchHistory for the batch addition or update
-                    BatchHistory newBatchHistory = new BatchHistory(
-                        NewBatch.Id,
-                        batchHistory.Quantity,
-                        DateTime.Now,
-                        batchHistory.Type,
-                        batchHistory.Comment
-                    );
+                    if (batchHistory.Quantity != 0)
+                    {
+                        //Create a BatchHistory for the batch addition or update
+                        BatchHistory newBatchHistory = new BatchHistory(
+                            NewBatch.Id,
+                            batchHistory.Quantity,
+                            DateTime.Now,
+                            batchHistory.Type,
+                            batchHistory.Comment
+                        );
 
-                    await context.BatchesHistory.AddAsync(newBatchHistory);
+                        await context.BatchesHistory.AddAsync(newBatchHistory);
+                    }
+
                     await context.SaveChangesAsync();
 
                     return NewBatch;
