@@ -59,7 +59,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                             product: item.product.name,
                             quantity: item.quantity,
                             expirationDate: item.expirationDate,
-                            batchState: item.batchState
+                            batchState: item.batchState.toLowerCase().replace('_', ' ')
                         }
                     } as ItemListInfo));
 
@@ -121,8 +121,6 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                     //Change letter color depending it state
                     
                     let colorStyle: string = 'black';
-
-                    item.Value.batchState = item.Value.batchState.toLowerCase().replace('_', ' ');
 
                     switch(item.Value.batchState) {
                         case'fresh':

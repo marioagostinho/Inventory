@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 
+import moment from 'moment';
+
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
 import ItemList, { ItemListHeader, ItemListInfo } from '../../components/ItemList/ItemList';
+
+//SERVICES
 import BatchHistoryService from '../../services/BatchHistoryService';
-import moment from 'moment';
 
 interface State {
     items: [];
@@ -44,7 +47,7 @@ class HistoryPage extends Component<{}, State> {
                             product: `${item.batch.product.name} (#${item.batch.id})`,
                             date: moment(item.date).format('DD/MM/YYYY HH:mm'),
                             amount: item.quantity,
-                            type: item.type,
+                            type: item.type.toLowerCase().replace('_', ' '),
                             comment: item.comment
                         }
                     } as ItemListInfo));

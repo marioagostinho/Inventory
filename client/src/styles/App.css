@@ -46,6 +46,10 @@ svg {
   margin-left: 10px;
 }
 
+.invalid-feedback {
+  font-size: 14px!important;
+}
+
 .card {
   font-size: 20px;
 }
@@ -53,6 +57,10 @@ svg {
 .Centered-Container{
   margin-top: 40vh;
   text-align: center;
+}
+
+.input-required {
+  color: #dc3545!important;
 }
 
 @media only screen and (min-width: 1200px) {

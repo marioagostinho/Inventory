@@ -1,35 +1,25 @@
 import React, { Component } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import * as yup from 'yup';
+import { Formik } from 'formik';
 import { Button, Card, Col, Form, Row } from 'react-bootstrap';
-import DatePicker from 'react-datepicker';
-
-import ProductService from '../../../services/ProductService';
-import BatchService from '../../../services/BatchService';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
 import NotFound from '../../NotFound/NotFoundPage';
 
-interface BatchFormInfo {
-    id: number;
-    productId: number;
-    quantity: number;
-    expirationDate: Date;
-}
+//FORM UI
+import InSelect from '../../../components/FormsUI/InSelect';
+import InTextField from '../../../components/FormsUI/InTextField';
+import InSubmitButton from '../../../components/FormsUI/InSubmitButton';
+import InDatePicker from '../../../components/FormsUI/InDatePicker';
 
-interface BatchHistoryFormInfo {
-    id: number;
-    batchId: number;
-    quantity: number;
-    date: Date;
-    type: string;
-    comment: string;
-}
+//SERVICES
+import ProductService from '../../../services/ProductService';
+import BatchService from '../../../services/BatchService';
 
 interface OrderFormState {
     products: any[];
-    batchForm: BatchFormInfo;
-    batchHistoryForm: BatchHistoryFormInfo;
 }
 
 interface OrderFormProps {
@@ -41,27 +31,16 @@ interface OrderFormProps {
 class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     private productService: ProductService;
     private batchService: BatchService;
+
+    //Reference for the formik
+    formikRef: any;
     
     //CONSTRUCTOR
     constructor(props: OrderFormProps) {
         super(props);
 
         this.state = {
-            products: [],
-            batchForm: {
-                id: 0,
-                productId: 0,
-                quantity: 0,
-                expirationDate: new Date() || null
-            },
-            batchHistoryForm: {
-                id: 0,
-                batchId: 0,
-                quantity: 0,
-                date: new Date() || null,
-                type: 'ORDER_IN',
-                comment: ''
-            }
+            products: []
         };
 
         this.productService = new ProductService();
@@ -80,14 +59,12 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
         this.productService.GetProducts()
             .then((data) => {
                 if(data && data.products) {
-
-                    const newBatchForm = this.state.batchForm;
-                    newBatchForm.productId = data.products[0].id;
+                    //Set form batchForm.productId value
+                    this.formikRef.setFieldValue('batchForm.productId', data.products[0].id)
 
                     //Set products array and batchForm product id state
                     this.setState({
-                        products: data.products,
-                        batchForm: newBatchForm
+                        products: data.products
                     });
                 }
             })
@@ -97,11 +74,13 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     };
 
     //Add or Update batch by Id
-    private AddOrUpdateBatchById = (batch: BatchFormInfo, batchHistory: BatchHistoryFormInfo) => {
-        batchHistory.quantity = batch.quantity;
-        batchHistory.date = new Date();
+    private AddOrUpdateBatchById = (values: any) => {
+        values.batchHistoryForm.quantity = values.batchForm.quantity;
+        values.batchHistoryForm.date = new Date();
 
-        this.batchService.AddOrUpdateBatch(batch, batchHistory)
+        console.log(values);
+
+        this.batchService.AddOrUpdateBatch(values.batchForm, values.batchHistoryForm)
              .then((data) => {
                 this.props.handleNavigation();
              })
@@ -111,11 +90,11 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     };
 
     //Add order out by Id
-    private AddBatchOrderOut = (productId: number, batchHistory: BatchHistoryFormInfo) => {
-        batchHistory.quantity = this.state.batchForm.quantity;
-        batchHistory.date = new Date();
+    private AddBatchOrderOut = (values: any) => {
+        values.batchHistoryForm.quantity = values.batchForm.quantity;
+        values.date = new Date();
 
-        this.batchService.AddBatchOrderOut(productId, batchHistory)
+        this.batchService.AddBatchOrderOut(values.batchForm.productId, values.batchHistoryForm)
              .then((data) => {
                 if(data.addBatchOrderOut) {
                     this.props.handleNavigation();
@@ -129,71 +108,57 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
     //ACTIONS
 
     //Selected AddOrUpdateBatchById or AddBatchOrderOut based on the type
-    private HandleAddAction = () => {
-        if(this.state.batchHistoryForm.type === "ORDER_IN") {
-            this.AddOrUpdateBatchById(this.state.batchForm, this.state.batchHistoryForm);
+    private HandleAddAction = (values:any) => {
+        values.batchForm.quantity = parseInt(values.batchForm.quantity);
+
+        if(values.batchHistoryForm.type === "ORDER_IN") {
+            this.AddOrUpdateBatchById(values);
         } else {
-            this.AddBatchOrderOut(this.state.batchForm.productId, this.state.batchHistoryForm);
+            this.AddBatchOrderOut(values);
         }
     }
 
-    //Change Form state when field reason changes
-    handleReasonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newBatchHistoryForm: BatchHistoryFormInfo = this.state.batchHistoryForm;
-        newBatchHistoryForm.type = event.target.value;
-
-        this.setState({
-            batchHistoryForm: newBatchHistoryForm
-        });
-    };
-
-    //Change Form state when field product changes
-    handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newBatchForm: BatchFormInfo = this.state.batchForm;
-        newBatchForm.productId = parseInt(event.target.value);
-        
-        this.setState({
-            batchForm: newBatchForm
-        });
-    };
-
-    //Change Form state when field quantity changes
-    handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const numericInput = event.target.value.replace(/[^0-9]/g, '');
-
-        const newBatchForm: BatchFormInfo = this.state.batchForm;
-        newBatchForm.quantity = parseInt(numericInput);
-
-        if(isNaN(newBatchForm.quantity)) {
-            newBatchForm.quantity = 0;
+    render() {
+        //Form values initialization
+        const INITIAL_VALUES = {
+            batchForm: {
+                id: this.props.id,
+                productId: 0,
+                quantity: 0,
+                expirationDate: new Date().toISOString().split('T')[0],
+              },
+              batchHistoryForm: {
+                id: 0,
+                batchId: this.props.id,
+                quantity: 0,
+                date: new Date().toISOString().split('T')[0],
+                type: 'ORDER_IN',
+                comment: ''
+              }
         }
 
-        this.setState({
-            batchForm: newBatchForm
+        //Form validation
+        const FORM_VALIDATION = yup.object().shape({
+            batchForm: yup.object().shape({
+              quantity: yup.number().required('Quantity is required').min(1, 'Quantity must be greater than 0'),
+              expirationDate: yup.date().nullable().test({
+                name: 'expirationDate',
+                exclusive: true,
+                message: 'Expiration Date is required',
+                test: function (value) {
+                  const type = this.resolve(yup.ref('batchHistoryForm.type'));
+                  if (type === 'ORDER_IN') {
+                    return value !== null;
+                  }
+                  return true;
+                },
+              })
+            }),
+            batchHistoryForm: yup.object().shape({
+              type: yup.string().required('Type is required'),
+              comment: yup.string().max(250, 'Comment must not exceed 250 characters'),
+            }),
         });
-    };
-
-    //Change Form state when field date changes
-    handleDateChange = (date: Date) => {
-        const newBatchForm: BatchFormInfo = this.state.batchForm;
-        newBatchForm.expirationDate = date;
-
-        this.setState({
-            batchForm: newBatchForm
-        });
-    };
-
-    //Change Form state when field cooment changes
-    handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newBatchHistoryForm: BatchHistoryFormInfo = this.state.batchHistoryForm;
-        newBatchHistoryForm.comment = event.target.value;
-
-        this.setState({
-            batchHistoryForm: newBatchHistoryForm
-        });
-    };
-
-    render() {
         
         return (
             <div className="order-content">
@@ -202,85 +167,78 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                     Title={'New Order'} />
 
                 {/* Form */}
-                <Form>
-                    <Card>
-                        <Card.Body>
-                            <Row className="mb-3">
-                                <Form.Group as={Col} controlId="formGridState">
-                                <Form.Label>Type</Form.Label>
-                                <Form.Select 
-                                    onChange={this.handleReasonChange}
-                                    value={this.state.batchHistoryForm.type} >
-                                    <option value='ORDER_IN'>Order In</option>
-                                    <option value='ORDER_OUT'>Order Out</option>
-                                </Form.Select>
-                                </Form.Group>
-                                <Form.Group as={Col} controlId="formGridState">
-                                <Form.Label>Product</Form.Label>
-                                <Form.Select 
-                                    onChange={this.handleProductChange}
-                                    value={this.state.batchForm.productId} >
-                                    <option key='0' value='' disabled>Choose product...</option>
-                                    {
-                                        this.state.products.map((product: any) => {
-                                            return <option key={product.id} value={product.id}>{product.name}</option>
-                                        })
-                                    }
-                                </Form.Select>
-                                </Form.Group>
-                            </Row>
+                <Card>
+                    <Formik
+                        initialValues={INITIAL_VALUES}
+                        validationSchema={FORM_VALIDATION}
+                        onSubmit={this.HandleAddAction}
+                        innerRef={(formik) => (this.formikRef = formik)} >
+                        {(formikProps: any) => (
+                            <Form>
+                                <Card.Body>
+                                    <Row className="mb-3">
+                                        <Form.Group as={Col} controlId="formGridState">
+                                        <Form.Label>Type <span className='input-required '>*</span></Form.Label>
+                                            <InSelect
+                                                name="batchHistoryForm.type"
+                                                otherProps={{}}>
+                                                <option value='ORDER_IN'>Order In</option>
+                                                <option value='ORDER_OUT'>Order Out</option>
+                                            </InSelect>
+                                        </Form.Group>
+                                        <Form.Group as={Col} controlId="formGridState">
+                                        <Form.Label>Product <span className='input-required '>*</span></Form.Label>
+                                            <InSelect
+                                                name="batchForm.productId"
+                                                otherProps={{}}>
+                                                {
+                                                    this.state.products.map((product: any) => {
+                                                        return <option key={product.id} value={product.id}>{product.name}</option>
+                                                    })
+                                                }
+                                            </InSelect>
+                                        </Form.Group>
+                                    </Row>
 
-                            <Row className="mb-3">
-                                <Form.Group as={Col} controlId="formGridCity">
-                                    <Form.Label>Quantity</Form.Label>
-                                    <Form.Control 
-                                        placeholder="Ex: 100" 
-                                        onChange={this.handleQuantityChange}
-                                        value={this.state.batchForm.quantity} />
-                                </Form.Group>
+                                    <Row className="mb-3">
+                                        <Form.Group as={Col} controlId="formGridCity">
+                                            <Form.Label>Quantity <span className='input-required '>*</span></Form.Label>
+                                            <InTextField 
+                                                name='batchForm.quantity'
+                                                otherProps={{placeholder:'Ex: 100'}}></InTextField>
+                                        </Form.Group>
+                                        { formikProps?.values?.batchHistoryForm?.type === "ORDER_IN" && (
+                                            <Form.Group as={Col} controlId="formGridZip">
+                                            <Form.Label>Expiration Date <span className='input-required '>*</span></Form.Label>
+                                                <InDatePicker name="batchForm.expirationDate" otherProps={{}}></InDatePicker>
+                                            </Form.Group>
+                                        )}
+                                    </Row>
 
-                                {
-                                    this.state.batchHistoryForm.type === "ORDER_IN" &&
-                                    <Form.Group as={Col} controlId="formGridZip">
-                                        <Form.Label>Expiration Date</Form.Label>
-                                        <DatePicker
-                                            selected={this.state.batchForm.expirationDate}
-                                            onChange={this.handleDateChange}
-                                            dateFormat="dd/MM/yyyy"
-                                            className="form-control"
-                                            popperPlacement="bottom-end"
-                                        />
-                                    </Form.Group>
-                                }
-                            </Row>
+                                    <Row className="mb-3">
+                                        <Form.Group as={Col} controlId="formGridCity">
+                                        <Form.Label>Comment</Form.Label>
+                                        <InTextField 
+                                                name='batchHistoryForm.comment'
+                                                otherProps={{as:"textarea", style:{ height: '200px' }}}></InTextField>
+                                        </Form.Group>
+                                    </Row>
+                                </Card.Body>
 
-                            <Row className="mb-3">
-                                <Form.Group as={Col} controlId="formGridCity">
-                                <Form.Label>Comment</Form.Label>
-                                <Form.Control 
-                                    as="textarea" 
-                                    style={{ height: '200px' }} 
-                                    onChange={this.handleCommentChange}
-                                    value={this.state.batchHistoryForm.comment} />
-                                </Form.Group>
-                            </Row>
-                        </Card.Body>
-
-                        <Card.Footer className="text-muted">
-                            <div className="form-actions">
-                                <Button variant="danger" type="button" href="/Orders">
-                                    Cancel
-                                </Button>
-                                <Button 
-                                    variant="success" 
-                                    type="button"
-                                    onClick={this.HandleAddAction}>
-                                    Add
-                                </Button>
-                            </div>
-                        </Card.Footer>
-                    </Card>
-                </Form>
+                                <Card.Footer className="text-muted">
+                                    <div className="form-actions">
+                                        <Button variant="danger" type="button" href="/Orders">
+                                            Cancel
+                                        </Button>
+                                        <InSubmitButton otherProps={{}}>
+                                            Add
+                                        </InSubmitButton>
+                                    </div>
+                                </Card.Footer>
+                            </Form>
+                        )}
+                    </Formik>
+                </Card>
             </div>
         );
     }
