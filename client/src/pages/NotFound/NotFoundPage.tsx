@@ -1,13 +1,11 @@
 import React, { useEffect, useState }  from 'react'
 import { useNavigate } from 'react-router-dom';
 
-import './NotFoundPage.css';
-
 export default function NotFound() {
     const navigate = useNavigate();
     const [countdown, setCountdown] = useState(5);
 
-    //COUNT 5 SECONDS AND AFTER THOSES 5 SECONDS REDIRECT TO HOME PAGE
+    //Count 5 seconds and after thoses 5 seconds redirect to Home Page
     useEffect(() => {
         const countdownTimer = setTimeout(() => {
           if (countdown === 1) {
@@ -21,7 +19,7 @@ export default function NotFound() {
       }, [countdown, navigate]);
 
     return (
-        <div className='NotFound-Container'>
+        <div className='Centered-Container'>
             <h1>404 - Page Not Found</h1>
             <p>Redirecting to Home in {countdown} seconds...</p>
         </div>

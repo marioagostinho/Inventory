@@ -5,7 +5,6 @@ export const ADD_UPDATE_PRODUCT_MUTATION = gql`
     addOrUpdateProduct (product: $product) {
       id
       name
-      isDeleted
     }
   }
 `;

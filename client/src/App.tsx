@@ -21,6 +21,10 @@ import BatchForm from './pages/Batches/BatchForm/BatchForm';
 import HistoryPage from './pages/History/HistoryPage';
 import ProductForm from './pages/Products/ProductForm/ProductForm';
 
+//TOAST
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const client = new ApolloClient({
   cache: new InMemoryCache({
     typePolicies: {}
@@ -31,23 +35,26 @@ const client = new ApolloClient({
 
 function App() {
   return (
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout/>}>
-            <Route index element={<Home/>} />
-            <Route path="products" element= {<ProductsPage />} />
-            <Route path="products/:productId" element= {<ProductForm />} />
-            <Route path="orders" element= {<OrdersPage />} />
-            <Route path="orders/:orderId" element= {<OrderForm />} />
-            <Route path="batches" element= {<BatchesPage />} />
-            <Route path="batches/:batchId" element= {<BatchForm />} />
-            <Route path="history" element= {<HistoryPage />} />
-            <Route path="*" element= {<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ApolloProvider>
+      <ApolloProvider client={client}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout/>}>
+              <Route index element={<Home/>} />
+              <Route path="products" element= {<ProductsPage />} />
+              <Route path="products/:productId" element= {<ProductForm />} />
+              <Route path="orders" element= {<OrdersPage />} />
+              <Route path="orders/:orderId" element= {<OrderForm />} />
+              <Route path="batches" element= {<BatchesPage />} />
+              <Route path="batches/:batchId" element= {<BatchForm />} />
+              <Route path="history" element= {<HistoryPage />} />
+              <Route path="*" element= {<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+        <ToastContainer 
+          position="top-center"
+          autoClose={3000}/>
+      </ApolloProvider>
   );
 }
 

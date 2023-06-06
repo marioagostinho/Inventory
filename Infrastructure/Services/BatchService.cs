@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Infrastructure.Services
 {
@@ -16,21 +17,37 @@ namespace Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public IQueryable<Batch> GetBatches()
+        public async Task<IQueryable<Batch>> GetBatchesAsync()
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
+                {
+                    //Ensure that is created cause is InMemory
+                    await context.Database.EnsureCreatedAsync();
 
-                return context.Batches
-                    .Where(b => !b.IsDeleted && b.Quantity > 0)
-                    .OrderByDescending(b => b.Id)
-                    .Include(b => b.Product);
+                    //Get list of Batches
+                    //That aren't deleted and have a quantity bigger than 0
+                    //Includes it's Product
+                    var batches = await context.Batches
+                        .Where(b => !b.IsDeleted && b.Quantity > 0)
+                        .OrderByDescending(b => b.Id)
+                        .Include(b => b.Product)
+                        .ToListAsync();
+
+                    if(batches == null)
+                    {
+                        throw new Exception("Error in GetBatchesAsync: batches was null");
+                    }
+
+                    //Convert batches to IQueryable
+                    return batches.AsQueryable();
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error in GetBatches: {ex.Message}");
+                throw new Exception(ex.Message);
             }
         }
 
@@ -38,54 +55,63 @@ namespace Infrastructure.Services
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
-
-                Batch NewBatch;
-
-                if (batch.Id == null || batch.Id == 0)
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
                 {
-                    NewBatch = new Batch(
-                        batch.ProductId,
-                        batch.Quantity,
-                        batch.ExpirationDate,
-                        batch.IsDeleted
-                    );
+                    //Ensure that is created cause is InMemory
+                    context.Database.EnsureCreated();
 
-                    await context.Batches.AddAsync(NewBatch);
-                }
-                else
-                {
-                    NewBatch = await context.Batches
-                        .Where(b => b.Id == batch.Id)
-                        .FirstOrDefaultAsync();
+                    Batch NewBatch;
 
-                    if (NewBatch == null)
+                    //If Batch Id == null or 0 creates a new Batch
+                    if (batch.Id == null || batch.Id == 0)
                     {
-                        throw new Exception($"Batch with id {NewBatch.Id} was not found");
+                        NewBatch = new Batch(
+                            batch.ProductId,
+                            batch.Quantity,
+                            batch.ExpirationDate
+                        );
+
+                        await context.Batches.AddAsync(NewBatch);
+                    }
+                    else
+                    {
+                        //Else update by its Id
+
+                        //Get batch by Id
+                        NewBatch = await context.Batches
+                            .Where(b => b.Id == batch.Id)
+                            .FirstOrDefaultAsync();
+
+                        //If NewBatch equals null throw exception
+                        if (NewBatch == null)
+                        {
+                            throw new Exception($"Batch with id {NewBatch.Id} was not found");
+                        }
+
+                        NewBatch.ProductId = batch.ProductId;
+                        NewBatch.Quantity = batch.Quantity;
+                        NewBatch.ExpirationDate = batch.ExpirationDate;
                     }
 
-                    NewBatch.ProductId = batch.ProductId;
-                    NewBatch.Quantity = batch.Quantity;
-                    NewBatch.ExpirationDate = batch.ExpirationDate;
-                    NewBatch.IsDeleted = batch.IsDeleted;
+                    if (batchHistory.Quantity != 0)
+                    {
+                        //Create a BatchHistory for the batch addition or update
+                        BatchHistory newBatchHistory = new BatchHistory(
+                            NewBatch.Id,
+                            batchHistory.Quantity,
+                            DateTime.Now,
+                            batchHistory.Type,
+                            batchHistory.Comment
+                        );
 
-                    context.Batches.Update(NewBatch);
+                        await context.BatchesHistory.AddAsync(newBatchHistory);
+                    }
+
+                    await context.SaveChangesAsync();
+
+                    return NewBatch;
                 }
-
-                BatchHistory newBatchHistory = new BatchHistory(
-                    NewBatch.Id,
-                    batchHistory.Quantity,
-                    DateTime.Now,
-                    batchHistory.Type,
-                    batchHistory.Comment
-                );
-
-                context.BatchesHistory.Add(newBatchHistory);
-
-                await context.SaveChangesAsync();
-
-                return NewBatch;
             }
             catch (Exception ex)
             {
@@ -93,60 +119,73 @@ namespace Infrastructure.Services
             }
         }
 
+        //Will Remove quantity required from the existing batches
         public async Task<bool> AddBatchOrderOutAsync(int productId, BatchHistory batchHistory)
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
-
-                int quantity = batchHistory.Quantity;
-
-                var batchList = await context.Batches
-                    .Where(b => b.ProductId == productId && b.ExpirationDate > DateTime.Now && b.IsDeleted == false)
-                    .ToListAsync();
-
-                if (quantity > batchList.Sum(b => b.Quantity))
-                    return false;
-
-                foreach (var batch in batchList)
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
                 {
-                    int recordedBatchQuantity = batch.Quantity;
+                    //Ensure that is created cause is InMemory
+                    context.Database.EnsureCreated();
 
-                    if (batch.Quantity > quantity)
+                    //Save needed quantity to be subtracted
+                    int quantity = batchHistory.Quantity;
+
+                    //Get all the existing batches for the required product
+                    //Check if isn't expired, quantity is bigger than 0 and isn't deleted
+                    var batchList = await context.Batches
+                        .Where(b => b.ProductId == productId && b.ExpirationDate >= DateTime.Now && b.Quantity > 0 && b.IsDeleted == false)
+                        .ToListAsync();
+
+                    //If the sum of all existing product batches are smaller that the required quantity return false
+                    if (quantity > batchList.Sum(b => b.Quantity))
+                        return false;
+
+                    foreach (var batch in batchList)
                     {
-                        recordedBatchQuantity = -quantity;
-                        batch.Quantity -= quantity;
-                        quantity = 0;
-                    }
-                    else
-                    {
-                        recordedBatchQuantity = -batch.Quantity;
-                        quantity -= batch.Quantity;
-                        batch.Quantity = 0;
-                        batch.IsDeleted = true;
+                        //Recorded original batch quantity to added in the Batch History
+                        int recordedBatchQuantity = batch.Quantity;
+
+                        //Check if the quantity of the batch is bigger that the required
+                        //Mean that the actual batch quantity is more than enough
+                        if (batch.Quantity > quantity)
+                        {
+                            recordedBatchQuantity = -quantity;
+                            batch.Quantity -= quantity;
+                            quantity = 0;
+                        }
+                        else //Mean that actual batch isn't enough or just enough
+                        {
+                            recordedBatchQuantity = -batch.Quantity;
+                            quantity -= batch.Quantity;
+                            batch.Quantity = 0;
+                            batch.IsDeleted = true;
+                        }
+
+                        //Create a BatchHistory for batch change
+                        BatchHistory newBatchHistory = new BatchHistory(
+                            batch.Id,
+                            recordedBatchQuantity,
+                            DateTime.Now,
+                            batchHistory.Type,
+                            batchHistory.Comment
+                        );
+
+                        await context.BatchesHistory.AddAsync(newBatchHistory);
+
+                        //If quantity is 
+                        if (quantity == 0)
+                        {
+                            break;
+                        }
                     }
 
-                    BatchHistory newBatchHistory = new BatchHistory(
-                        batch.Id,
-                        recordedBatchQuantity,
-                        DateTime.Now,
-                        batchHistory.Type,
-                        batchHistory.Comment
-                    );
+                    await context.SaveChangesAsync();
 
-                    context.Batches.Update(batch);
-                    context.BatchesHistory.Add(newBatchHistory);
-
-                    if (quantity == 0)
-                    {
-                        break;
-                    }
+                    return true;
                 }
-
-                await context.SaveChangesAsync();
-
-                return true;
             }
             catch (Exception ex)
             {
@@ -158,32 +197,39 @@ namespace Infrastructure.Services
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
-
-                var batch = await context.Batches
-                                        .Where(b => b.Id == batchId)
-                                        .FirstOrDefaultAsync();
-
-                if (batch == null)
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
                 {
-                    throw new Exception($"Batch with id {batchId} was not found");
+                    //Ensure that is created cause is InMemory
+                    context.Database.EnsureCreated();
+
+                    //Get batch by Id
+                    var batch = await context.Batches
+                                    .Where(b => b.Id == batchId)
+                                    .FirstOrDefaultAsync();
+
+                    //If batch equals null throw exception
+                    if (batch == null)
+                    {
+                        throw new Exception($"Batch with id {batchId} was not found");
+                    }
+
+                    //Set IsDeleted to true
+                    batch.IsDeleted = true;
+
+                    //Create a BatchHistory for the batch change
+                    BatchHistory NewBatchHistory = new BatchHistory(
+                        batch.Id,
+                        -batch.Quantity,
+                        DateTime.Now,
+                        EHistoryType.Deleted,
+                        "Batch deleted"
+                    );
+
+                    await context.BatchesHistory.AddAsync(NewBatchHistory);
+
+                    return await context.SaveChangesAsync() > 0;
                 }
-
-                batch.IsDeleted = true;
-
-                BatchHistory NewBatchHistory = new BatchHistory(
-                    batch.Id,
-                    -batch.Quantity,
-                    DateTime.Now,
-                    EHistoryType.Deleted,
-                    "Batch deleted"
-                );
-
-                context.BatchesHistory.Add(NewBatchHistory);
-                context.Batches.Update(batch);
-
-                return await context.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {

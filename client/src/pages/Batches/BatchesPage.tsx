@@ -8,6 +8,7 @@ import BatchService from '../../services/BatchService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import DeleteModal from '../../components/DeleteModal/DeleteModal';
+import UniversalToast from '../../components/UniversalToast/UniversalToast';
 
 interface BatchesComponentState {
     items: any[];
@@ -21,9 +22,11 @@ interface BatchesComponentProps {
     handleNavigation: (path: string) => void;
 }
 
+//Component
 class BatchesPageComponent extends Component<BatchesComponentProps, BatchesComponentState> {
     private batchService: BatchService;
 
+    //CONSTRUCTOR
     constructor(props: any) { 
         super(props); 
 
@@ -38,10 +41,14 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
         this.batchService = new BatchService();
     }
 
+    //AFTER THE COMPONENT IS LOAD
     componentDidMount() {
         this.fetchBatches();
     }
 
+    //SERVICES
+
+    //Fecth all the batches
     private fetchBatches = () => {
         this.batchService
             .GetBatches()
@@ -52,7 +59,8 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                             id: item.id,
                             product: item.product.name,
                             quantity: item.quantity,
-                            expirationDate: item.expirationDate
+                            expirationDate: item.expirationDate,
+                            batchState: item.batchState.toLowerCase().replace('_', ' ')
                         }
                     } as ItemListInfo));
 
@@ -64,28 +72,31 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
             })
             .catch((error) => {
                 console.error(error);
-
-                this.setState({
-                    isItemListLoading: false
-                })
             });
     };
 
+    //Delete batch by Id
     private DeleteBatchById = (id: number) => {
         this.batchService.DeleteBatchById(id)
-             .then((data) => {
+                .then((data) => {
                 var updatedItems = this.state.items.filter((item) => item.Value.id !== id);
 
                 this.setState({
                     items: updatedItems,
                     isModalVisible: false
                 });
-             })
-             .catch((error) => {
-                 console.error(error);
-             });
-     };
 
+                //Toast
+                UniversalToast.success("Batch was deleted successfully");
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+    };
+
+    //ACTION
+
+    //Delete batch by ID
     deleteAction = (id: number, name: string) => {
         this.setState({
             batchId: id,
@@ -94,6 +105,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
         })
     }
 
+    //Change delete modal visibility
     handleModalVisibility = (newVisibility: boolean) => {
         this.setState({
             isModalVisible: newVisibility
@@ -101,6 +113,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
     }
 
     render() {
+        //Set batches list header
         const Header: ItemListHeader[] = [
             { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} }},
             { Title: "Product", Value: "product" },
@@ -109,23 +122,28 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                 Title: "Expiration Date",
                 Value: "expirationDate",
                 Render: (header: ItemListHeader, item: ItemListInfo) => {
-                    let colorStyle: string = 'green';
-                    let productSate: string = 'fresh';
+                    //Change letter color depending it state
                     
-                    const today = new Date().setHours(0, 0, 0, 0);
-                    const productDate = new Date(item.Value[header.Value]).setHours(0, 0, 0, 0);
+                    let colorStyle: string = 'black';
 
-                    if(productDate == today) {
-                        colorStyle = '#ffcc33';
-                        productSate = 'expiring today';
-                    } else if(productDate < today) {
-                        colorStyle = 'red';
-                        productSate = 'expired';
+                    switch(item.Value.batchState) {
+                        case'fresh':
+                            colorStyle = 'green';
+                            break;
+                        case 'expiring today':
+                            colorStyle = '#ffcc33';
+                            break;
+                        case 'expired':
+                            colorStyle = 'red';
+                            break;
+                        default:
+                            console.error("Unknown state");
+                            break;
                     }
 
                     return (
                         <td key={header.Value} style={{color: colorStyle, fontWeight: 'bold'}}>
-                            {`${moment(item.Value[header.Value]).format('DD/MM/YYYY')} (${productSate})`}
+                            {`${moment(item.Value[header.Value]).format('DD/MM/YYYY')} (${item.Value.batchState})`}
                         </td>
                     );
                 }
@@ -134,6 +152,7 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
                 Title: "",
                 Value: "",
                 Render: (header: ItemListHeader, item: ItemListInfo) => {
+                    //Add action buttons
                     return (
                         <td key='actions'>
                             <div className='table-actions'>
@@ -155,14 +174,17 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
 
         return (
             <div className='batches-content'>
+                {/* Page Title */}
                 <ContentTitle Title={'Batches'} />
 
+                {/* Batches Table */}
                 <ItemList
                     Header={Header}
                     Items={this.state.items}
                     NoItemsWarning='No batches available'
                     IsLoading={this.state.isItemListLoading} />
 
+                {/* Delete Modal */}
                 <DeleteModal 
                     id={this.state.batchId}
                     name={this.state.batchName}
@@ -174,9 +196,12 @@ class BatchesPageComponent extends Component<BatchesComponentProps, BatchesCompo
     }
 }
 
+//Function
 function BatchesPage() {
+    //Hook
     const navigate = useNavigate();
 
+    //Redirect to /batch/{id} to edit
     const handleNavigation = (id:any) => {
         navigate(`/batches/${id}`);
     };

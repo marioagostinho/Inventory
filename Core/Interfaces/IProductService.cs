@@ -4,7 +4,7 @@ namespace Core.Interfaces
 {
     public interface IProductService
     {
-        IQueryable<Product> GetProducts();
+        Task<IQueryable<Product>> GetProductsAsync();
         Task<Product> AddOrUpdateProductAsync(Product product);
         Task<bool> DeleteProductAsync(int productId);
     }

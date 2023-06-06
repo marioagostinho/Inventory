@@ -6,7 +6,7 @@ import { ADD_BATCH_ORDER_OUT_MUTATION, ADD_UPDATE_BATCH_MUTATION, DELETE_BATCH_B
 export default class BatchService {
     private client: ApolloClient<any>;
 
-    //CONSTRUCT APOLLO CLIENT TO DO REQUESTS
+    //CONSTRUCTOR
     constructor() {
         const API_BASE_URL = 'http://localhost:5037/graphql'
 
@@ -22,7 +22,7 @@ export default class BatchService {
         });
     }
 
-    //GET ALL PRODUCTS 
+    //Get all product that aren't deleted 
     async GetBatches() {
         try {
             const { data } = await this.client.query({
@@ -37,6 +37,7 @@ export default class BatchService {
         }
     }
 
+    //Get batch by id
     async GetBatchById(id: number) {
         try {
             const { data } = await this.client.query({
@@ -52,8 +53,8 @@ export default class BatchService {
         }
     }
 
+    //Add or updated batch, if batch id equal 0 then add, otherwise update
     async AddOrUpdateBatch(newBatch: any, newBatchHistory: any) {
-        console.log(newBatch);
         try {
             const { data } = await this.client.mutate({
                 mutation: ADD_UPDATE_BATCH_MUTATION,
@@ -65,12 +66,11 @@ export default class BatchService {
 
             return data;
         } catch (error) {
-            console.error(error);
-            
             throw error;
         }
     }
 
+    //Add batch order out
     async AddBatchOrderOut(productId: number, newBatchHistory: any) {
         try {
             const { data } = await this.client.mutate({
@@ -89,6 +89,7 @@ export default class BatchService {
         }
     }
 
+    //Delete batch by Id
     async DeleteBatchById(batchId: number) {
         try {
             const { data } = await this.client.mutate({

@@ -15,20 +15,35 @@ namespace Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public IQueryable<Product> GetProducts()
+        public async Task<IQueryable<Product>> GetProductsAsync()
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
+                {
+                    //Ensure that is created cause is InMemory
+                    await context.Database.EnsureCreatedAsync();
 
-                return context.Products
-                    .Where(b => !b.IsDeleted)
-                    .OrderByDescending(b => b.Id);
+                    //Get list of Products
+                    //That aren't deleted
+                    var products = await context.Products
+                        .Where(b => !b.IsDeleted)
+                        .OrderByDescending(b => b.Id)
+                        .ToListAsync();
+
+                    if(products == null)
+                    {
+                        throw new Exception("Error in GetProductsAsync: Products are null");
+                    }
+
+                    //Convert products to IQueryable
+                    return products.AsQueryable();
+                } 
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error in GetProducts: {ex.Message}");
+                throw new Exception($"Error in GetProductsAsync: {ex.Message}");
             }
         }
 
@@ -36,39 +51,42 @@ namespace Infrastructure.Services
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
-
-                Product NewProduct;
-
-                if (product.Id == null || product.Id == 0)
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
                 {
-                    NewProduct = new Product(product.Name, product.IsDeleted);
+                    //Ensure that is created cause is InMemory
+                    await context.Database.EnsureCreatedAsync();
 
-                    await context.Products.AddAsync(NewProduct);
-                }
-                else
-                {
-                    NewProduct = await context.Products
-                        .Where(p => p.Id == product.Id)
-                        .FirstOrDefaultAsync();
+                    Product NewProduct;
 
-                    if (NewProduct == null)
+                    //If Product Id == null or 0 creates a new Product
+                    if (product.Id == null || product.Id == 0)
                     {
-                        throw new Exception($"Product with id {product.Id} was not found");
+                        NewProduct = new Product(product.Name);
+
+                        await context.Products.AddAsync(NewProduct);
                     }
                     else
                     {
+                        //Else updates the Product by it's Id
+                        NewProduct = await context.Products
+                            .Where(p => p.Id == product.Id)
+                            .FirstOrDefaultAsync();
+
+                        //If by any reason the product is null throw an exception
+                        if (NewProduct == null)
+                        {
+                            throw new Exception($"Error in AddOrUpdateProductAsync: Id {product.Id} was not found");
+                        }
+
                         NewProduct.Name = product.Name;
                         NewProduct.IsDeleted = product.IsDeleted;
-
-                        context.Products.Update(NewProduct);
                     }
+
+                    await context.SaveChangesAsync();
+
+                    return NewProduct;
                 }
-
-                await context.SaveChangesAsync();
-
-                return NewProduct;
             }
             catch (Exception ex)
             {
@@ -80,43 +98,50 @@ namespace Infrastructure.Services
         {
             try
             {
-                var context = _dbContext.CreateDbContext();
-                context.Database.EnsureCreated();
-
-                var product = await context.Products
-                                        .Where(p => p.Id == productId)
-                                        .FirstOrDefaultAsync();
-
-                if (product == null)
+                //Create DB context while is being used
+                using (var context = _dbContext.CreateDbContext())
                 {
-                    throw new Exception($"Product with id {productId} was not found");
+                    //Ensure that is created cause is InMemory
+                    context.Database.EnsureCreated();
+
+                    //Get product by Id
+                    var product = await context.Products
+                                            .Where(p => p.Id == productId)
+                                            .FirstOrDefaultAsync();
+
+                    //If product equal null throw exception
+                    if (product == null)
+                    {
+                        throw new Exception($"Error in DeleteProductAsync: Id {productId} was not found");
+                    }
+
+                    //Set product's IsDeleted to true
+                    product.IsDeleted = true;
+
+                    //Get product's existing batches
+                    var batches = await context.Batches
+                                            .Where(b => b.ProductId == productId && b.IsDeleted == false && b.Quantity > 0)
+                                            .ToListAsync();
+
+                    //Create a batch history for every deleted batch
+                    foreach (var batch in batches)
+                    {
+                        batch.IsDeleted = true;
+
+                        BatchHistory NewBatchHistory = new BatchHistory(
+                            batch.Id,
+                            -batch.Quantity,
+                            DateTime.Now,
+                            EHistoryType.Deleted,
+                            "Batch deleted"
+                        );
+
+                        context.BatchesHistory.Add(NewBatchHistory);
+                    }
+
+                    //If any was any change returns true else false
+                    return await context.SaveChangesAsync() > 0;
                 }
-
-                product.IsDeleted = true;
-
-                var batches = await context.Batches
-                                        .Where(b => b.ProductId == productId)
-                                        .ToListAsync();
-
-                foreach (var batch in batches)
-                {
-                    batch.IsDeleted = true;
-
-                    BatchHistory NewBatchHistory = new BatchHistory(
-                        batch.Id,
-                        -batch.Quantity,
-                        DateTime.Now,
-                        EHistoryType.Deleted,
-                        "Batch deleted"
-                    );
-
-                    context.BatchesHistory.Add(NewBatchHistory);
-                }
-
-                context.Products.Update(product);
-                context.Batches.UpdateRange(batches);
-
-                return await context.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {

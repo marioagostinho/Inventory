@@ -4,6 +4,6 @@ namespace Core.Interfaces
 {
     public interface IBatchHistoryService
     {
-        IQueryable<BatchHistory> GetBatchHistories();
+        Task<IQueryable<BatchHistory>> GetBatchHistorieAsync();
     }
 }

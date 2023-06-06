@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
@@ -6,8 +7,9 @@ import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import ItemList, { ItemListHeader, ItemListInfo } from '../../components/ItemList/ItemList';
 import ProductService from '../../services/ProductService';
 import ContentTitle from '../../components/ContentTitle/ContentTitle';
-import { useNavigate } from 'react-router-dom';
 import DeleteModal from '../../components/DeleteModal/DeleteModal';
+import { toast } from 'react-toastify';
+import UniversalToast from '../../components/UniversalToast/UniversalToast';
 
 interface ProductsComponentState {
     open: boolean;
@@ -22,15 +24,11 @@ interface ProductsComponentProps {
     AddClick: () => void;
 }
 
-
+//Component
 class ProductsPageComponent extends Component<ProductsComponentProps, ProductsComponentState> {
     private productService: ProductService;
 
-    item: ItemListInfo = {
-        Value: []
-    };
-
-    //Construct 
+    //CONTRUCTOR
     constructor(props: any) {
         super(props);
 
@@ -46,15 +44,20 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
         this.productService = new ProductService();
     }
 
+    //AFTER THE COMPONENT IS LOAD
     componentDidMount() {
         this.fetchProducts();
     }
 
+    //SERVICES
+
+    //Fecth all the products
     private fetchProducts = () => {
         this.productService
         .GetProducts()
         .then((data) => {
             if (data && data.products) {
+                //Data to items array
                 const items = data.products.map((item: any) => ({
                     Value: {
                         id: item.id,
@@ -62,6 +65,7 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
                     }
                 } as ItemListInfo));
 
+                //Set items and isItemListLoading state
                 this.setState({
                     items,
                     isItemListLoading: false
@@ -73,31 +77,29 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
         });
     };
 
+    //Delete product by Id
     private DeleteProductById = (id: number) => {
         this.productService.DeleteProductById(id)
              .then((data) => {
-                console.log(data);
-
+                //Update items array by removing the item with the ID removed
                 var updatedItems = this.state.items.filter((item) => item.Value.id !== id);
 
+                //Set items and isModalVisible state
                 this.setState({
                     items: updatedItems,
                     isModalVisible: false
                 });
+
+                UniversalToast.success("Product was deleted successfully");
              })
              .catch((error) => {
                  console.error(error);
-
-                 this.setState({
-                    isItemListLoading: false
-                 });
              });
-     };
+    };
 
-    onAction = (newItem: ItemListInfo) => {
-        this.item = newItem;
-    }
+    //ACTIONS
 
+    //Delete product by ID
     deleteAction = (id: number, name: string) => {
         this.setState({
             productId: id,
@@ -106,7 +108,13 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
         });
     }
 
+    //Change delete modal visibility
     handleModalVisibility = (newVisibility: boolean) => {
+        if(newVisibility == true)
+        {
+            toast.dismiss();
+        }
+
         this.setState({
             isModalVisible: newVisibility
         });
@@ -115,6 +123,7 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
     render() {
         const { AddClick } = this.props;
 
+        //Set product list header
         const Header: ItemListHeader[] = [
             { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} } },
             { Title: "Name", Value: "name" },
@@ -140,7 +149,7 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
 
         return (
         <div className='products-content'>
-
+            {/* Page Title */}
             <ContentTitle
                 Title={'Product'}
                 AddClick={AddClick}
@@ -153,7 +162,8 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
                 NoItemsWarning="No products available" 
                 IsLoading={this.state.isItemListLoading}/>
 
-             <DeleteModal 
+            {/* Delete Modal */}
+            <DeleteModal 
                 id={this.state.productId}
                 name={this.state.productName}
                 isVisible={this.state.isModalVisible} 
@@ -165,9 +175,12 @@ class ProductsPageComponent extends Component<ProductsComponentProps, ProductsCo
     }
 }
 
+//Function
 function ProductsPage() {
+    //Hooks
     const navigate = useNavigate();
 
+    //Redirect to /products/0 to add a product
     const AddClick = () => {
         navigate(`/products/0`);
     };

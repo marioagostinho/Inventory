@@ -21,9 +21,11 @@ interface State {
     isOrderOutListLoading: boolean;
 }
 
+//Component
 class OrdersPageComponent extends Component<OrdersComponentProps, State> {
     private batchHistoryService: BatchHistoryService;
 
+    //CONSTRUCTOR
     constructor(props: any) {
         super(props);
 
@@ -37,15 +39,19 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
         this.batchHistoryService = new BatchHistoryService();
     }
 
+    //AFTER THE COMPONENT IS LOAD
     componentDidMount() {
         this.fetchBatchHistoriesByType("ORDER_IN", "inItems");
         this.fetchBatchHistoriesByType("ORDER_OUT", "outItems");
     }
 
+    //SERVICES
+
+    //Fecth batch histories by it type
     fetchBatchHistoriesByType = (type: string, targetState: keyof State) => {
         this.batchHistoryService
             .GetBatchHistoriesByType(type as "string")
-            .then((data) => {
+            .then((data) => { 
                 if (data && data.batchHistories) {
                     const items = data.batchHistories
                         .map((item: any) => ({
@@ -57,12 +63,14 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
                             }
                     } as ItemListInfo));
 
+                    //Object to update State because you can't update it directly with [targetState]
                     const updatedState = {
                         [targetState]: items,
                         isOrderInListLoading: false,
                         isOrderOutListLoading: false
                     } as Pick<State, keyof State>;
               
+                    //Update state with new Batch Histories array type
                     this.setState(updatedState);
                 }
             })
@@ -72,7 +80,7 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
     };
 
     render() {
-        //TABLE INFORMATION
+        //Set orders list header
         const Header: ItemListHeader[] = [
             { Title: "ID.", Value: "id", Props: { style:{fontWeight: 'bold'} } },
             { Title: "Product", Value: "product" },
@@ -83,26 +91,25 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
 
                     const colorStyle: string = (parseInt(item.Value[header.Value]) < 0) ? "red" : "green";
 
-                    return <td key={item.Value[header.Value]} style={{color: colorStyle, fontWeight: 'bold'}}>
+                    return <td key={item.Value[header.Value].toString() + "rw"} style={{color: colorStyle, fontWeight: 'bold'}}>
                         {item.Value[header.Value]}
                     </td>;
                 }
             },
             { Title: "Date", Value: "date" }
         ];
-        const { inItems, outItems } = this.state;
 
         const { AddClick } = this.props;
-
 
         return (
             <div className='orders-content'>
 
+                {/* Page Title */}
                 <ContentTitle 
                     Title={'Orders'}
                     AddClick={AddClick} />
 
-
+                {/* Nav */}
                 <Tab.Container id="left-tabs-example" defaultActiveKey="first">
                     <Row>
                         <Col sm={2}>
@@ -118,16 +125,18 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
                         <Col sm={10}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="first">
+                                {/* Orders in list */}
                                 <ItemList 
                                     Header={Header}
-                                    Items={inItems} 
+                                    Items={this.state.inItems} 
                                     NoItemsWarning="No orders in"
                                     IsLoading={this.state.isOrderInListLoading} />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="second">
+                                {/* Orders out list */}
                                 <ItemList 
                                     Header={Header}
-                                    Items={outItems} 
+                                    Items={this.state.outItems} 
                                     NoItemsWarning="No orders out" 
                                     IsLoading={this.state.isOrderOutListLoading} />
                                 </Tab.Pane>
@@ -140,9 +149,12 @@ class OrdersPageComponent extends Component<OrdersComponentProps, State> {
     }
 }
 
+//Function
 function OrdersPage() {
+    //Hook
     const navigate = useNavigate();
 
+    //Redirect to /orders/0 to add an order
     const AddClick = () => {
         navigate(`/orders/0`);
     };

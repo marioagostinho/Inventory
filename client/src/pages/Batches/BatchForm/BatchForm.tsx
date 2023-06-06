@@ -1,39 +1,26 @@
 import React, { Component } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Button, Card, Col, Form, Row } from 'react-bootstrap';
-import DatePicker from 'react-datepicker';
+import * as yup from 'yup';
+import { Formik } from 'formik';
 import moment from 'moment';
-
-import ProductService from '../../../services/ProductService';
-import BatchService from '../../../services/BatchService';
-import BatchHistoryService from '../../../services/BatchHistoryService';
+import { Button, Card, Col, Form, Row } from 'react-bootstrap';
 
 import ContentTitle from '../../../components/ContentTitle/ContentTitle';
 import NotFound from '../../NotFound/NotFoundPage';
 
+//FORM UI
+import InSelect from '../../../components/FormsUI/InSelect';
+import InTextField from '../../../components/FormsUI/InTextField';
+import InDatePicker from '../../../components/FormsUI/InDatePicker';
+import InSubmitButton from '../../../components/FormsUI/InSubmitButton';
 
-interface BatchFormInfo {
-    id: number;
-    productId: number;
-    quantity: number;
-    expirationDate: Date;
-    isDeleted: boolean;
-}
-
-interface BatchHistoryFormInfo {
-    id: number;
-    batchId: number;
-    quantity: number;
-    date: Date;
-    type: string;
-    comment: string;
-}
+//SERVICE
+import BatchService from '../../../services/BatchService';
+import UniversalToast from '../../../components/UniversalToast/UniversalToast';
 
 interface BatchFormState {
     products: any[];
-    batchForm: BatchFormInfo;
-    batchHistoryForm: BatchHistoryFormInfo;
 }
 
 interface BatchFormProps {
@@ -41,60 +28,48 @@ interface BatchFormProps {
     handleNavigation: () => void;
 }
 
+//Component
 class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
-    private productService: ProductService;
     private BatchService: BatchService;
-    private batchHistoryService: BatchHistoryService
-
-    private batchForm: BatchFormInfo;
-    private batchHistoryForm: BatchHistoryFormInfo;
 
     private OriginalQuantity: number;
+
+    //Reference for the formik
+    formikRef: any;
     
+    //CONSTRUCTOR
     constructor(props: BatchFormProps) {
         super(props);
 
         this.OriginalQuantity = 0;
 
-        this.batchForm = {
-            id: props.id,
-            productId: 0,
-            quantity: 0,
-            expirationDate: new Date() || null,
-            isDeleted: false
-        };
-
-        this.batchHistoryForm = {
-            id: 0,
-            batchId: 0,
-            quantity: 0,
-            date: new Date() || null,
-            type: 'DEFECT',
-            comment: ''
-        };
-
         this.state = {
-            products: [],
-            batchForm: this.batchForm,
-            batchHistoryForm: this.batchHistoryForm
+            products: []
         };
 
-        this.productService = new ProductService();
         this.BatchService = new BatchService();
-        this.batchHistoryService = new BatchHistoryService();  
     }
 
+    //AFTER THE COMPONENT IS LOAD
     componentDidMount() {
-        this.fetchProducts();
         this.fetchBatchById(this.props.id);
     }
 
-    private fetchProducts = () => {
-        this.productService.GetProducts()
+    //SERVICES
+
+    //Fetch batch by Id
+    private fetchBatchById = (id: number) => {
+        this.BatchService.GetBatchById(id)
             .then((data) => {
-                if(data && data.products) {                    
+                if(data && data.batches) {
+                    this.OriginalQuantity = data.batches[0].quantity;
+
+                    this.formikRef.setFieldValue('batchForm.productId', data.batches[0].product.id)
+                    this.formikRef.setFieldValue('batchForm.quantity', data.batches[0].quantity)
+                    this.formikRef.setFieldValue('batchForm.expirationDate', moment(data.batches[0].expirationDate).format("YYYY-MM-DD"))
+
                     this.setState({
-                        products: data.products
+                        products: [data.batches[0].product]
                     });
                 }
             })
@@ -103,36 +78,16 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             });
     };
 
-    private fetchBatchById = (id: number) => {
-        this.BatchService.GetBatchById(id)
+    //Add or Update batch by Id
+    private AddOrUpdateBatchById = (values: any) => {
+        values.batchForm.quantity = parseInt(values.batchForm.quantity);
+        values.batchHistoryForm.quantity = values.batchForm.quantity - this.OriginalQuantity;
+
+        this.BatchService.AddOrUpdateBatch(values.batchForm, values.batchHistoryForm)
             .then((data) => {
-                if(data && data.batches) {
-                    this.OriginalQuantity = data.batches[0].quantity;
-
-                    this.batchForm = {
-                        id: this.props.id,
-                        productId: data.batches[0].product.id,
-                        quantity: data.batches[0].quantity,
-                        expirationDate: moment(data.batches[0].expirationDate).toDate(),
-                        isDeleted: false
-                    }
-
-                    this.setState({
-                        batchForm: this.batchForm
-                    })
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    };
-
-    private AddOrUpdateBatchById = (batch: BatchFormInfo, batchHistory: BatchHistoryFormInfo) => {
-        batchHistory.quantity = batch.quantity - this.OriginalQuantity;
-        batchHistory.date = new Date();
-
-        this.BatchService.AddOrUpdateBatch(batch, batchHistory)
-            .then((data) => {
+                //Toast
+                UniversalToast.success("Batch was edited successfully");
+                
                 this.props.handleNavigation();
             })
             .catch((error) => {
@@ -140,152 +95,141 @@ class BatchFormComponent extends Component<BatchFormProps, BatchFormState> {
             });
     };
 
-    handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        this.batchForm.productId = parseInt(event.target.value);
-        this.setState({
-            batchForm: this.batchForm
-        });
-    };
+    render() {
+        let OriginalQuantity = this.OriginalQuantity;
 
-    handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const numericInput = event.target.value.replace(/[^0-9]/g, '');
-        this.batchForm.quantity = parseInt(numericInput);
-
-        if(isNaN(this.batchForm.quantity)) {
-            this.batchForm.quantity = 0;
+        //Form values initialization
+        const INITIAL_VALUES = {
+            batchForm: {
+                id: this.props.id,
+                productId: 0,
+                quantity: 0,
+                expirationDate: new Date().toISOString().split('T')[0],
+              },
+              batchHistoryForm: {
+                id: 0,
+                batchId: this.props.id,
+                quantity: 0,
+                date: new Date().toISOString().split('T')[0],
+                type: 'DEFECT',
+                comment: ''
+              }
         }
 
-        this.setState({
-            batchForm: this.batchForm
+        //Form validation
+        const FORM_VALIDATION = yup.object().shape({
+            batchForm: yup.object().shape({
+              quantity: yup.number()
+                .required('Quantity is required')
+                .min(1, 'Quantity must be greater than 0'),
+              expirationDate: yup.date()
+                .required("Expiration Date is required")
+            }),
+            batchHistoryForm: yup.object().shape({
+              type: yup.string()
+                .required('Type is required'),
+              comment: yup.string()
+                .max(250, 'Comment must not exceed 250 characters'),
+            }),
         });
-    };
-
-    handleReasonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        this.batchHistoryForm.type = event.target.value;
-
-        this.setState({
-            batchHistoryForm: this.batchHistoryForm
-        });
-    };
-
-    handleDateChange = (date: Date) => {
-        this.batchForm.expirationDate = date;
-
-        this.setState({
-            batchForm: this.batchForm
-        });
-    };
-
-    handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.batchHistoryForm.comment = event.target.value;
-
-        this.setState({
-            batchHistoryForm: this.batchHistoryForm
-        });
-    };
-
-    render() {
         
         return (
             <div className="batch-content">
+                {/* Page Title */}
                 <ContentTitle
                     Title={`Edit Batch #${this.props.id}`} />
-                
-                <Form>
-                    <Card>
-                        <Card.Body>
-                        <Row className="mb-3">
-                            <Form.Group as={Col} controlId="formGridState">
-                                <Form.Label>Product</Form.Label>
-                                <Form.Select
-                                    disabled
-                                    onChange={this.handleProductChange}
-                                    value={this.batchForm.productId}>
-                                    <option key='0' value='' disabled>Choose product...</option>
-                                    {
-                                        this.state.products.map((product: any) => {
-                                            return <option key={product.id} value={product.id}>{product.name}</option>
-                                        })
-                                    }
-                                </Form.Select>
-                            </Form.Group>
-                        </Row>
-                        
-                        <Row className="mb-3">
-                            <Form.Group as={Col} controlId="formGridCity">
-                                <Form.Label>Quantity</Form.Label>
-                                <Form.Control 
-                                    placeholder="Ex: 100"
-                                    onChange={this.handleQuantityChange}
-                                    value={this.batchForm.quantity}/>
-                            </Form.Group>
 
-                            <Form.Group as={Col} controlId="formGridZip">
-                                <Form.Label>Expiration Date</Form.Label>
-                                <DatePicker
-                                    selected={this.batchForm.expirationDate}
-                                    onChange={this.handleDateChange}
-                                    dateFormat="dd/MM/yyyy"
-                                    placeholderText="Ex: 31/02/2012"
-                                    className="form-control"
-                                    popperPlacement="bottom-end"
-                                />
-                            </Form.Group>
+                {/* Form */}
+                <Card>
+                    <Formik
+                        initialValues={INITIAL_VALUES}
+                        validationSchema={FORM_VALIDATION}
+                        onSubmit={this.AddOrUpdateBatchById}
+                        innerRef={(formik) => (this.formikRef = formik)} >
+                        <Form>
+                            <Card.Body>
+                            <Row className="mb-3">
+                                <Form.Group as={Col} controlId="formGridState">
+                                    <Form.Label>Product <span className='input-required '>*</span></Form.Label>
+                                    <InSelect
+                                        name="batchForm.productId"
+                                        otherProps={{disabled: true}}>
+                                        {
+                                            this.state.products.map((product: any) => {
+                                                return <option key={product.id} value={product.id}>{product.name}</option>
+                                            })
+                                        }
+                                    </InSelect>
+                                </Form.Group>
+                            </Row>
+                            
+                            <Row className="mb-3">
+                                <Form.Group as={Col} controlId="formGridCity">
+                                    <Form.Label>Quantity <span className='input-required '>*</span></Form.Label>
+                                    <InTextField 
+                                        name='batchForm.quantity'
+                                        otherProps={{placeholder:'Ex: 100'}}></InTextField>
+                                </Form.Group>
 
-                            <Form.Group as={Col} controlId="formGridState">
-                                <Form.Label>Reason</Form.Label>
-                                <Form.Select 
-                                    onChange={this.handleReasonChange}
-                                    value={this.batchHistoryForm.type}>
-                                    <option key="DEFECT" value="DEFECT">Defect</option>
-                                    <option key="LOST" value="LOST">Lost</option>
-                                    <option key="OTHER" value="OTHER">Other</option>
-                                </Form.Select>
-                            </Form.Group>
-                        </Row>
+                                <Form.Group as={Col} controlId="formGridZip">
+                                    <Form.Label>Expiration Date <span className='input-required '>*</span></Form.Label>
+                                    <InDatePicker name="batchForm.expirationDate" otherProps={{}}></InDatePicker>
+                                </Form.Group>
 
-                        <Row className="mb-3">
-                            <Form.Group as={Col} controlId="formGridCity">
-                                <Form.Label>Comment</Form.Label>
-                                <Form.Control 
-                                    as="textarea"
-                                    style={{ height: '200px' }}
-                                    onChange={this.handleCommentChange}
-                                    value={this.batchHistoryForm.comment} />
-                            </Form.Group>
-                        </Row>
+                                <Form.Group as={Col} controlId="formGridState">
+                                    <Form.Label>Reason <span className='input-required '>*</span></Form.Label>
+                                    <InSelect
+                                        name="batchHistoryForm.type"
+                                        otherProps={{}}>
+                                        <option key="DEFECT" value="DEFECT">Defect</option>
+                                        <option key="LOST" value="LOST">Lost</option>
+                                        <option key="OTHER" value="OTHER">Other</option>
+                                    </InSelect>
+                                </Form.Group>
+                            </Row>
 
-                        </Card.Body>
+                            <Row className="mb-3">
+                                <Form.Group as={Col} controlId="formGridCity">
+                                    <Form.Label>Comment</Form.Label>
+                                    <InTextField 
+                                        name='batchHistoryForm.comment'
+                                        otherProps={{as:"textarea", style:{ height: '200px' }}}></InTextField>
+                                </Form.Group>
+                            </Row>
 
-                        <Card.Footer className="text-muted">
-                            <div className="form-actions">
-                                <Button variant="danger" type="button" href="/Batches">
-                                    Cancel
-                                </Button>
-                                <Button 
-                                    variant="success"
-                                    type="button"
-                                    onClick={() => this.AddOrUpdateBatchById(this.batchForm, this.batchHistoryForm)}>
-                                    Confirm
-                                </Button>
-                            </div>
-                        </Card.Footer>
-                    </Card>
-                </Form>
+                            </Card.Body>
+
+                            <Card.Footer className="text-muted">
+                                <div className="form-actions">
+                                    <Button variant="danger" type="button" href="/Batches">
+                                        Cancel
+                                    </Button>
+                                    <InSubmitButton otherProps={{}}>
+                                        Confirm
+                                    </InSubmitButton>
+                                </div>
+                            </Card.Footer>
+                        </Form>
+                    </Formik>
+                </Card>
             </div>
         );
     }
 }
 
+//Function
 function BatchForm() {
+    //Hooks
     const params = useParams<{ batchId?: string }>();
     const batchId = parseInt(params.batchId || '0');
     const navigate = useNavigate();
 
+    //Redirect to /batches
     const handleNavigation = () => {
         navigate('/batches');
     }
 
+    //If batch id isn't a number or is smaller than zero return NotFound page
     if(batchId === 0 || isNaN(Number(batchId)))
     {
         return <NotFound />
