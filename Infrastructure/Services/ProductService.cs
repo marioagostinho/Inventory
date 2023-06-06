@@ -81,9 +81,6 @@ namespace Infrastructure.Services
 
                         NewProduct.Name = product.Name;
                         NewProduct.IsDeleted = product.IsDeleted;
-
-                        context.Products.Update(NewProduct);
-
                     }
 
                     await context.SaveChangesAsync();
@@ -141,9 +138,6 @@ namespace Infrastructure.Services
 
                         context.BatchesHistory.Add(NewBatchHistory);
                     }
-
-                    context.Products.Update(product);
-                    context.Batches.UpdateRange(batches);
 
                     //If any was any change returns true else false
                     return await context.SaveChangesAsync() > 0;

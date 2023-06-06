@@ -92,8 +92,6 @@ namespace Infrastructure.Services
                         NewBatch.ProductId = batch.ProductId;
                         NewBatch.Quantity = batch.Quantity;
                         NewBatch.ExpirationDate = batch.ExpirationDate;
-
-                        context.Batches.Update(NewBatch);
                     }
 
                     if (batchHistory.Quantity != 0)
@@ -175,7 +173,6 @@ namespace Infrastructure.Services
                             batchHistory.Comment
                         );
 
-                        context.Batches.Update(batch);
                         await context.BatchesHistory.AddAsync(newBatchHistory);
 
                         //If quantity is 
@@ -208,8 +205,8 @@ namespace Infrastructure.Services
 
                     //Get batch by Id
                     var batch = await context.Batches
-                                            .Where(b => b.Id == batchId)
-                                            .FirstOrDefaultAsync();
+                                    .Where(b => b.Id == batchId)
+                                    .FirstOrDefaultAsync();
 
                     //If batch equals null throw exception
                     if (batch == null)
@@ -229,7 +226,6 @@ namespace Infrastructure.Services
                         "Batch deleted"
                     );
 
-                    context.Batches.Update(batch);
                     await context.BatchesHistory.AddAsync(NewBatchHistory);
 
                     return await context.SaveChangesAsync() > 0;

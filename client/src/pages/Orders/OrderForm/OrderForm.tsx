@@ -104,7 +104,7 @@ class OrderFormComponent extends Component<OrderFormProps, OrderFormState> {
                 } 
                 else {
                     //Toast
-                    UniversalToast.error("Order out can't be done with that product or quantity!");
+                    UniversalToast.error("Order can't be place with the selected product or/and quantity!");
                 }
              })
              .catch((error) => {
