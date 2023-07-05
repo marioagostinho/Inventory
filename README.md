@@ -10,7 +10,7 @@
 
 <br />
 
-This project was build as a **task work** for [FELFEL](https://felfel.ch/en) with the goal of implementing a simple inventory.
+This project was build with the goal of implementing a simples food inventory by batches.
 
 <br />
 
@@ -76,14 +76,11 @@ and voilà the application is ready to be used :slightly_smiling_face:
 
 ## Roadmap
 
+- [ ] Add custom GraphQL Schema
+- [ ] Add cancellation tokens
 - [ ] Add product page
-- [ ] Add product's batches in the product page
-- [ ] Add client forms validation
-- [ ] Add notification after adding/editing or deleting something
-- [ ] Multi-language support?
-    - [ ] German
-    - [ ] French
-    - [ ] Italian
+- [x] Add client forms validation
+- [x] Add notification after adding/editing or deleting something
 
 
 <!-- VARS -->
