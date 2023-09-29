@@ -16,7 +16,7 @@ This project was build with the goal of implementing a simples food inventory by
 
 ### Built With
 
-* .NET 7.0
+* .NET Core 7.0
 * GraphQL (Hot Chocolate)
 * Entity Framework Core
 * EF Core InMemory
